@@ -1,0 +1,501 @@
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { supabase } from '@/lib/supabase'
+import { Loader } from '@googlemaps/js-api-loader'
+
+export default function AddListingPage() {
+  const [formData, setFormData] = useState({
+    business_name: '',
+    category_id: '',
+    parish_id: '',
+    short_description: '',
+    description: '',
+    phone: '',
+    email: '',
+    website: '',
+    address: '',
+    latitude: '',
+    longitude: '',
+    contact_name: '',
+    contact_email: '',
+    facebook_url: '',
+    instagram_url: '',
+    google_business_url: '',
+    tripadvisor_url: '',
+    twitter_url: ''
+  })
+  const [imageFile, setImageFile] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState('')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [categories, setCategories] = useState([])
+  const [parishes, setParishes] = useState([])
+  const [loadingData, setLoadingData] = useState(true)
+  const [mapLoaded, setMapLoaded] = useState(false)
+  const [showAdvancedLocation, setShowAdvancedLocation] = useState(false)
+  const mapRef = useRef(null)
+  const mapInstanceRef = useRef(null)
+  const markerRef = useRef(null)
+  const autocompleteRef = useRef(null)
+  const searchInputRef = useRef(null)
+
+  useEffect(() => {
+    async function loadData() {
+      const { data: cats } = await supabase.from('categories').select('*').order('name')
+      const { data: pars } = await supabase.from('parishes').select('*').order('name')
+      setCategories(cats || [])
+      setParishes(pars || [])
+      setLoadingData(false)
+    }
+    loadData()
+  }, [])
+
+  useEffect(() => {
+    initMap()
+  }, [])
+
+  const initMap = async () => {
+    try {
+      const loader = new Loader({
+        apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+        version: 'weekly',
+        libraries: ['places', 'geocoding']
+      })
+
+      const google = await loader.load()
+      const grenadaCenter = { lat: 12.1165, lng: -61.6789 }
+
+      const map = new google.maps.Map(mapRef.current, {
+        center: grenadaCenter,
+        zoom: 12,
+        mapTypeControl: true,
+        streetViewControl: false,
+        fullscreenControl: false,
+        styles: [{ featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'on' }] }]
+      })
+
+      mapInstanceRef.current = map
+
+      const marker = new google.maps.Marker({
+        map: map,
+        draggable: true,
+        animation: google.maps.Animation.DROP,
+        title: 'Drag me to your business location'
+      })
+
+      markerRef.current = marker
+      map.addListener('click', (e) => placeMarker(e.latLng, google))
+      marker.addListener('dragend', (e) => updateLocation(e.latLng, google))
+
+      if (searchInputRef.current) {
+        const autocomplete = new google.maps.places.Autocomplete(searchInputRef.current, {
+          componentRestrictions: { country: 'gd' },
+          fields: ['geometry', 'formatted_address', 'name']
+        })
+
+        autocomplete.addListener('place_changed', () => {
+          const place = autocomplete.getPlace()
+          if (place.geometry && place.geometry.location) {
+            placeMarker(place.geometry.location, google)
+            map.setCenter(place.geometry.location)
+            map.setZoom(16)
+            const address = place.formatted_address || place.name || ''
+            setFormData(prev => ({ ...prev, address }))
+          }
+        })
+
+        autocompleteRef.current = autocomplete
+      }
+
+      setMapLoaded(true)
+    } catch (err) {
+      console.error('Error loading map:', err)
+      setError('Failed to load map. You can still submit without map selection.')
+    }
+  }
+
+  const placeMarker = (location, google) => {
+    markerRef.current.setPosition(location)
+    markerRef.current.setVisible(true)
+    markerRef.current.setAnimation(google.maps.Animation.BOUNCE)
+    setTimeout(() => markerRef.current.setAnimation(null), 750)
+    updateLocation(location, google)
+  }
+
+  const updateLocation = async (location, google) => {
+    const lat = location.lat()
+    const lng = location.lng()
+    setFormData(prev => ({ ...prev, latitude: lat.toFixed(6), longitude: lng.toFixed(6) }))
+    const geocoder = new google.maps.Geocoder()
+    try {
+      const result = await geocoder.geocode({ location })
+      if (result.results && result.results[0]) {
+        setFormData(prev => ({ ...prev, address: result.results[0].formatted_address }))
+      }
+    } catch (err) {
+      console.error('Reverse geocoding failed:', err)
+    }
+  }
+
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value })
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      if (!file.type.startsWith('image/')) { setError('Please select a valid image file'); return }
+      if (file.size > 5 * 1024 * 1024) { setError('Image size must be less than 5MB'); return }
+      setImageFile(file)
+      const reader = new FileReader()
+      reader.onloadend = () => setImagePreview(reader.result)
+      reader.readAsDataURL(file)
+      setError('')
+    }
+  }
+
+  const removeImage = () => { setImageFile(null); setImagePreview(null) }
+
+  const uploadImage = async () => {
+    if (!imageFile) return null
+    setUploadingImage(true)
+    try {
+      const fileExt = imageFile.name.split('.').pop()
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+      const filePath = `listings/${fileName}`
+      const { error: uploadError } = await supabase.storage.from('listing-images').upload(filePath, imageFile, { cacheControl: '3600', upsert: false })
+      if (uploadError) throw uploadError
+      const { data: { publicUrl } } = supabase.storage.from('listing-images').getPublicUrl(filePath)
+      return publicUrl
+    } catch (err) {
+      throw new Error('Failed to upload image: ' + err.message)
+    } finally {
+      setUploadingImage(false)
+    }
+  }
+
+  const generateSlug = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    try {
+      let imageUrl = null
+      if (imageFile) imageUrl = await uploadImage()
+
+      const listingData = {
+        ...formData,
+        slug: generateSlug(formData.business_name),
+        status: 'pending',
+        image_url: imageUrl,
+        latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+        longitude: formData.longitude ? parseFloat(formData.longitude) : null
+      }
+
+      const { error: submitError } = await supabase.from('listings').insert([listingData])
+      if (submitError) throw submitError
+
+      try {
+        const selectedCategory = categories.find(cat => cat.id === formData.category_id)
+        const selectedParish = parishes.find(par => par.id === formData.parish_id)
+        const emailResponse = await fetch('/api/notify-new-listing', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            business_name: listingData.business_name,
+            category_name: selectedCategory?.name || 'Not specified',
+            parish_name: selectedParish?.name || 'Not specified',
+            contact_name: listingData.contact_name,
+            email: listingData.email,
+            phone: listingData.phone,
+            website: listingData.website,
+            address: listingData.address,
+            description: listingData.description,
+            status: listingData.status,
+            slug: listingData.slug
+          })
+        })
+        const emailResult = await emailResponse.json()
+        if (emailResponse.ok) console.log('✅ Email sent:', emailResult)
+        else console.error('❌ Email failed:', emailResult)
+      } catch (emailError) {
+        console.error('❌ Email error:', emailError)
+      }
+
+      setSuccess(true)
+      setFormData({
+        business_name: '', category_id: '', parish_id: '', short_description: '',
+        description: '', phone: '', email: '', website: '', address: '',
+        latitude: '', longitude: '', contact_name: '', contact_email: '',
+        facebook_url: '', instagram_url: '', google_business_url: '',
+        tripadvisor_url: '', twitter_url: ''
+      })
+      setImageFile(null)
+      setImagePreview(null)
+      if (markerRef.current) markerRef.current.setVisible(false)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } catch (err) {
+      setError(err.message || 'Something went wrong. Please try again.')
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const inputClass = "w-full px-3 md:px-4 py-2.5 md:py-3 border-2 border-gray-200 rounded-lg focus:border-[#007A5E] focus:outline-none text-sm md:text-base"
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="bg-white border-b border-[#007A5E] sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-between items-center">
+            <Link href="/" className="flex items-center gap-3">
+              <Image src="/grenada-flag.png" alt="Grenada Flag" width={50} height={50} className="rounded-full" />
+              <div>
+                <div className="text-lg md:text-xl font-bold text-gray-900">GRENADA</div>
+                <div className="text-xs md:text-sm text-[#007A5E] font-semibold">GRENADA SEARCH</div>
+              </div>
+            </Link>
+
+            <nav className="hidden lg:flex gap-6 items-center">
+              <Link href="/" className="text-gray-700 hover:text-[#007A5E] font-medium">Home</Link>
+              <Link href="/parishes" className="text-gray-700 hover:text-[#007A5E] font-medium">Browse Parishes</Link>
+              <Link href="/categories" className="text-gray-700 hover:text-[#007A5E] font-medium">Categories</Link>
+              <Link href="/about" className="text-gray-700 hover:text-[#007A5E] font-medium">About Us</Link>
+              <Link href="/contact" className="text-gray-700 hover:text-[#007A5E] font-medium">Contact</Link>
+            </nav>
+
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden text-gray-700 p-2" aria-label="Toggle menu">
+              {mobileMenuOpen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+              )}
+            </button>
+          </div>
+
+          {mobileMenuOpen && (
+            <nav className="lg:hidden mt-4 pb-4 border-t border-gray-200 pt-4 space-y-3">
+              <Link href="/" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Home</Link>
+              <Link href="/parishes" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Browse Parishes</Link>
+              <Link href="/categories" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Categories</Link>
+              <Link href="/about" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>About Us</Link>
+              <Link href="/contact" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
+            </nav>
+          )}
+        </div>
+      </header>
+
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">List Your Business</h1>
+        <p className="text-base md:text-lg text-gray-600 mb-6 md:mb-8">
+          Get your business in front of thousands of visitors exploring Grenada — the Spice Isle of the Caribbean.
+          Fill out the form below and we&apos;ll review your submission.
+        </p>
+
+        {success && (
+          <div className="bg-green-50 border-l-4 border-green-500 p-4 md:p-6 mb-6 md:mb-8">
+            <h3 className="text-base md:text-lg font-bold text-green-800 mb-2">Success! 🎉</h3>
+            <p className="text-green-700 text-sm md:text-base">Your listing has been submitted and is pending review. We&apos;ll be in touch soon!</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-red-50 border-l-4 border-[#CE1126] p-4 md:p-6 mb-6 md:mb-8">
+            <p className="text-red-700 text-sm md:text-base">{error}</p>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-bold text-gray-900 mb-2">Business Name *</label>
+            <input type="text" name="business_name" value={formData.business_name} onChange={handleChange} required className={inputClass} placeholder="e.g., Spice Island Beach Resort" />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-900 mb-2">Category *</label>
+            <select name="category_id" value={formData.category_id} onChange={handleChange} required className={inputClass}>
+              <option value="">Select a category</option>
+              {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.icon_emoji} {cat.name}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-900 mb-2">Parish *</label>
+            <select name="parish_id" value={formData.parish_id} onChange={handleChange} required className={inputClass}>
+              <option value="">Select a parish</option>
+              {parishes.map(par => <option key={par.id} value={par.id}>{par.name}</option>)}
+            </select>
+          </div>
+
+          {/* Business Image */}
+          <div className="border-t-2 border-gray-200 pt-6">
+            <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-4">Business Image</h3>
+            <label className="block text-sm font-bold text-gray-900 mb-2">Upload Main Image</label>
+            <p className="text-xs md:text-sm text-gray-600 mb-3">Upload a high-quality image of your business (max 5MB, JPG/PNG)</p>
+            {imagePreview ? (
+              <div className="relative">
+                <img src={imagePreview} alt="Preview" className="w-full h-48 md:h-64 object-cover rounded-lg border-2 border-gray-200" />
+                <button type="button" onClick={removeImage} className="absolute top-2 right-2 bg-[#CE1126] text-white px-3 py-1 rounded-lg text-sm font-semibold hover:bg-red-700 transition">Remove</button>
+              </div>
+            ) : (
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 md:p-8 text-center hover:border-[#007A5E] transition">
+                <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" id="image-upload" />
+                <label htmlFor="image-upload" className="cursor-pointer">
+                  <div className="text-3xl md:text-4xl mb-2">📸</div>
+                  <p className="text-gray-600 mb-1 text-sm md:text-base">Click to upload an image</p>
+                  <p className="text-xs md:text-sm text-gray-500">JPG, PNG up to 5MB</p>
+                </label>
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-900 mb-2">Short Description *</label>
+            <input type="text" name="short_description" value={formData.short_description} onChange={handleChange} required maxLength="150" className={inputClass} placeholder="Brief one-line description (max 150 characters)" />
+            <p className="text-xs md:text-sm text-gray-500 mt-1">{formData.short_description.length}/150</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-900 mb-2">Full Description *</label>
+            <textarea name="description" value={formData.description} onChange={handleChange} required rows="6" className={inputClass} placeholder="Detailed description of your business, services, and what makes you unique" />
+          </div>
+
+          {/* Contact Information */}
+          <div className="border-t-2 border-gray-200 pt-6">
+            <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-4">Contact Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              <div>
+                <label className="block text-sm font-bold text-gray-900 mb-2">Phone</label>
+                <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className={inputClass} placeholder="+1 (473) 440-0000" />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-900 mb-2">Email</label>
+                <input type="email" name="email" value={formData.email} onChange={handleChange} className={inputClass} placeholder="info@yourbusiness.com" />
+              </div>
+            </div>
+            <div className="mt-4 md:mt-6">
+              <label className="block text-sm font-bold text-gray-900 mb-2">Website</label>
+              <input type="url" name="website" value={formData.website} onChange={handleChange} className={inputClass} placeholder="https://yourbusiness.com" />
+            </div>
+          </div>
+
+          {/* Map */}
+          <div className="border-t-2 border-gray-200 pt-6">
+            <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-4">📍 Business Location</h3>
+            <p className="text-xs md:text-sm text-gray-600 mb-4">Search for your address or click on the map to mark your exact location</p>
+
+            <div className="mb-4">
+              <label className="block text-sm font-bold text-gray-900 mb-2">Search Address</label>
+              <input ref={searchInputRef} type="text" className={inputClass} placeholder="Start typing your address in Grenada..." />
+              <p className="text-xs text-gray-500 mt-1">Type to search, or click on the map below</p>
+            </div>
+
+            <div className="mb-4 relative">
+              <div ref={mapRef} className="w-full h-64 md:h-96 rounded-lg border-2 border-gray-200 bg-gray-100" />
+              {!mapLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-lg">
+                  <div className="text-center">
+                    <div className="text-3xl md:text-4xl mb-2">🗺️</div>
+                    <p className="text-gray-600 text-sm md:text-base">Loading map...</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-bold text-gray-900 mb-2">Address *</label>
+              <input type="text" name="address" value={formData.address} onChange={handleChange} required className={inputClass} placeholder="Your business address in Grenada" />
+            </div>
+
+            {formData.latitude && formData.longitude && (
+              <div className="bg-green-50 border-l-4 border-green-500 p-3 md:p-4 mb-4">
+                <div className="flex items-start">
+                  <div className="text-green-400 mr-3">✓</div>
+                  <div className="flex-1">
+                    <p className="text-xs md:text-sm font-semibold text-green-800 mb-1">Location Set Successfully</p>
+                    <p className="text-xs md:text-sm text-green-700 mb-2">{formData.address || 'Location marked on map'}</p>
+                    <a href={`https://www.google.com/maps?q=${formData.latitude},${formData.longitude}`} target="_blank" rel="noopener noreferrer" className="text-xs md:text-sm text-[#007A5E] hover:text-[#005F48] font-semibold">
+                      Preview on Google Maps →
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-4">
+              <button type="button" onClick={() => setShowAdvancedLocation(!showAdvancedLocation)} className="text-xs md:text-sm text-gray-600 hover:text-gray-900 font-semibold flex items-center gap-2">
+                {showAdvancedLocation ? '▼' : '▶'} Advanced: Manual Coordinates
+              </button>
+              {showAdvancedLocation && (
+                <div className="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                  <p className="text-xs md:text-sm text-gray-600 mb-3">For advanced users: manually enter coordinates</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-900 mb-2">Latitude</label>
+                      <input type="number" step="any" name="latitude" value={formData.latitude} onChange={handleChange} className={inputClass} placeholder="12.0561" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-gray-900 mb-2">Longitude</label>
+                      <input type="number" step="any" name="longitude" value={formData.longitude} onChange={handleChange} className={inputClass} placeholder="-61.7488" />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Social Media */}
+          <div className="border-t-2 border-gray-200 pt-6">
+            <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-4">Social Media & Business Profiles</h3>
+            <p className="text-xs md:text-sm text-gray-600 mb-4">Add your social media and business profile links (optional)</p>
+            <div className="space-y-4">
+              {[
+                { label: '📘 Facebook Page', name: 'facebook_url', placeholder: 'https://facebook.com/yourbusiness' },
+                { label: '📸 Instagram', name: 'instagram_url', placeholder: 'https://instagram.com/yourbusiness' },
+                { label: '🔍 Google Business Profile', name: 'google_business_url', placeholder: 'https://maps.google.com/...' },
+                { label: '🦉 TripAdvisor', name: 'tripadvisor_url', placeholder: 'https://tripadvisor.com/...' },
+                { label: '🐦 Twitter/X', name: 'twitter_url', placeholder: 'https://twitter.com/yourbusiness' },
+              ].map(({ label, name, placeholder }) => (
+                <div key={name}>
+                  <label className="block text-sm font-bold text-gray-900 mb-2">{label}</label>
+                  <input type="url" name={name} value={formData[name]} onChange={handleChange} className={inputClass} placeholder={placeholder} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Owner Contact */}
+          <div className="border-t-2 border-gray-200 pt-6">
+            <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-4">Your Contact Information</h3>
+            <p className="text-xs md:text-sm text-gray-600 mb-4">We&apos;ll use this to contact you about your listing (not shown publicly)</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              <div>
+                <label className="block text-sm font-bold text-gray-900 mb-2">Your Name *</label>
+                <input type="text" name="contact_name" value={formData.contact_name} onChange={handleChange} required className={inputClass} />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-900 mb-2">Your Email *</label>
+                <input type="email" name="contact_email" value={formData.contact_email} onChange={handleChange} required className={inputClass} />
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading || uploadingImage}
+            className="w-full bg-[#007A5E] text-white px-6 md:px-8 py-3 md:py-4 rounded-lg font-bold text-base md:text-lg hover:bg-[#005F48] transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {uploadingImage ? 'Uploading Image...' : loading ? 'Submitting...' : 'Submit Listing'}
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
