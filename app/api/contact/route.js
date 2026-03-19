@@ -1,19 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
 const supabaseAdmin = createClient(
-  supabaseUrl,
-  serviceRoleKey || anonKey,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  { auth: { autoRefreshToken: false, persistSession: false } }
 )
 
 async function verifyTurnstile(token) {
@@ -33,7 +24,6 @@ export async function POST(request) {
   try {
     const formData = await request.json()
 
-    // Verify Turnstile token
     const turnstileValid = await verifyTurnstile(formData.turnstileToken)
     if (!turnstileValid) {
       return NextResponse.json(
@@ -44,20 +34,17 @@ export async function POST(request) {
 
     console.log('📝 Contact Form Submission:', { name: formData.name, email: formData.email })
 
-    // 1. Save to Supabase
-    const { data: contact, error: dbError } = await supabaseAdmin
+    // 1. Save to Supabase — map form fields to table columns, no .select() to avoid RLS issue
+    const { error: dbError } = await supabaseAdmin
       .from('contact_submissions')
       .insert([{
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone || null,
-        subject: formData.subject,
-        message: formData.message,
+        sender_name:    formData.name,
+        sender_email:   formData.email,
+        sender_phone:   formData.phone || null,
+        message:        formData.message,
         business_inquiry: formData.businessInquiry,
-        submitted_at: new Date().toISOString()
+        status:         'new'
       }])
-      .select()
-      .single()
 
     if (dbError) {
       console.error('Database error:', dbError)
@@ -70,7 +57,7 @@ export async function POST(request) {
     if (ghlApiKey && ghlLocationId) {
       try {
         const ghlContactResponse = await fetch(
-          `https://services.leadconnectorhq.com/contacts/`,
+          'https://services.leadconnectorhq.com/contacts/',
           {
             method: 'POST',
             headers: {
@@ -94,7 +81,6 @@ export async function POST(request) {
             })
           }
         )
-
         if (!ghlContactResponse.ok) {
           console.error('GHL API error:', await ghlContactResponse.text())
         }
@@ -105,8 +91,7 @@ export async function POST(request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Contact form submitted successfully',
-      id: contact?.id
+      message: 'Contact form submitted successfully'
     })
 
   } catch (error) {
