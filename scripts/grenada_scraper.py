@@ -23,7 +23,7 @@ from slugify import slugify
 # ------------------------------------------------------------------ #
 
 API_KEY      = "AIzaSyAcfi9SAA0cKz30nkSLMSEcS6roWX2hB4E"
-TARGET_TOTAL = 3000
+TARGET_TOTAL = 10000
 OUTPUT_FILE  = "grenada_listings_seed.csv"
 DELAY        = 0.5    # seconds between API calls
 
@@ -184,9 +184,82 @@ GOOGLE_TYPE_MAP = {
 }
 
 CATEGORY_SEARCHES = [
+    # General
     "restaurants", "hotels", "bars", "supermarkets", "pharmacies",
     "tours", "water sports", "taxis", "transportation", "banks", "schools",
     "hospitals", "beauty salons", "marinas", "real estate",
+    # Tourism & Experiences
+    "eco tours grenada",
+    "hiking grenada",
+    "snorkeling grenada",
+    "whale watching grenada",
+    "fishing charters grenada",
+    "catamaran grenada",
+    "kayaking grenada",
+    "zip line grenada",
+    "cooking classes grenada",
+    "chocolate tours grenada",
+    "spice tours grenada",
+    "rum tours grenada",
+    "sailing charters grenada",
+    "diving grenada",
+    "boat tours grenada",
+    # Accommodation
+    "villas grenada",
+    "vacation rentals grenada",
+    "cottages grenada",
+    "boutique hotels grenada",
+    "eco lodges grenada",
+    "guesthouses grenada",
+    # Food & Drink
+    "beach bars grenada",
+    "rum shops grenada",
+    "catering grenada",
+    "bakeries grenada",
+    "fish markets grenada",
+    "food trucks grenada",
+    "seafood restaurants grenada",
+    "caribbean restaurants grenada",
+    # Professional Services
+    "lawyers grenada",
+    "accountants grenada",
+    "dentists grenada",
+    "veterinarians grenada",
+    "architects grenada",
+    "engineers grenada",
+    "insurance grenada",
+    # Retail & Trade
+    "car dealerships grenada",
+    "hardware stores grenada",
+    "clothing stores grenada",
+    "electronics grenada",
+    "jewellery grenada",
+    "gift shops grenada",
+    "art galleries grenada",
+    # Health & Wellness
+    "yoga grenada",
+    "massage grenada",
+    "physiotherapy grenada",
+    "opticians grenada",
+    "clinics grenada",
+    # Education
+    "nurseries grenada",
+    "tutoring grenada",
+    "driving schools grenada",
+    # Community & Services
+    "churches grenada",
+    "credit unions grenada",
+    "funeral homes grenada",
+    "laundry grenada",
+    "car wash grenada",
+    # Carriacou specific
+    "businesses in Carriacou",
+    "restaurants Carriacou",
+    "hotels Carriacou",
+    "bars Carriacou",
+    "tours Carriacou",
+    "boat building Carriacou",
+    "guesthouses Carriacou",
 ]
 
 SEARCH_FIELD_MASK  = "places.id,places.displayName,places.formattedAddress,places.primaryType,places.types,places.location"
@@ -337,13 +410,15 @@ def main():
             f"hotels in {p['name']} Grenada",
             f"shops in {p['name']} Grenada",
             f"services in {p['name']} Grenada",
+            f"attractions in {p['name']} Grenada",
+            f"tours in {p['name']} Grenada",
         ])
     collected = collect_place_ids(parish_queries, TARGET_TOTAL, collected)
     print(f"  Phase 1 done: {len(collected)} unique place IDs\n")
 
     if len(collected) < TARGET_TOTAL:
         print("── Phase 2: Category fill ─────────────────────────")
-        cat_queries = [f"{cat} in Grenada" for cat in CATEGORY_SEARCHES]
+        cat_queries = [f"{cat} in Grenada" if "grenada" not in cat.lower() else cat for cat in CATEGORY_SEARCHES]
         collected = collect_place_ids(cat_queries, TARGET_TOTAL, collected)
         print(f"  Phase 2 done: {len(collected)} unique place IDs\n")
 
