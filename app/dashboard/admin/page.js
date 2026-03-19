@@ -108,13 +108,9 @@ export default function AdminDashboard() {
 
     const { data: listingsData } = await supabase
       .from('listings')
-      .select(`
-        *,
-        category:categories(name, icon),
-        parish:parishes(name)
-      `)
+      .select(`*, category:categories(name, icon), parish:parishes(name)`)
       .order('created_at', { ascending: false })
-    setListings(listingsData || [])
+      .limit(5000)
 
     const { data: claimsData } = await supabase
       .from('claimed_listings')
@@ -424,7 +420,7 @@ export default function AdminDashboard() {
             </p>
             <Link
               href="/dashboard"
-              className="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition"
+              className="inline-block bg-[#007A5E] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#005F48] transition"
             >
               Back to Dashboard
             </Link>
@@ -448,20 +444,20 @@ export default function AdminDashboard() {
             <Link href="/dashboard" className="flex items-center gap-3">
               <Image 
                 src="/grenada-flag.png" 
-                alt="Antigua Flag" 
+                alt="Grenada Flag" 
                 width={50} 
                 height={50}
                 className="rounded-full"
               />
               <div>
-                <div className="text-xl font-bold text-gray-900">ANTIGUA & BARBUDA</div>
-                <div className="text-sm text-indigo-600 font-semibold">ADMIN PANEL</div>
+                <div className="text-xl font-bold text-gray-900">GRENADA</div>
+                <div className="text-sm text-[#007A5E] font-semibold">ADMIN PANEL</div>
               </div>
             </Link>
             <div className="flex items-center gap-4">
               <Link
                 href="/dashboard/analytics"
-                className="bg-indigo-100 text-indigo-700 px-4 py-2 rounded-lg font-semibold hover:bg-indigo-200 transition flex items-center gap-2"
+                className="bg-[#E8F5F1] text-[#007A5E] px-4 py-2 rounded-lg font-semibold hover:bg-[#B3DDD4] transition flex items-center gap-2"
               >
                 📊 Analytics
               </Link>
@@ -470,7 +466,7 @@ export default function AdminDashboard() {
               </span>
               <Link
                 href="/dashboard"
-                className="text-gray-700 hover:text-indigo-600 font-medium"
+                className="text-gray-700 hover:text-[#007A5E] font-medium"
               >
                 ← My Dashboard
               </Link>
@@ -497,7 +493,7 @@ export default function AdminDashboard() {
                 onClick={() => setActiveTab(tab)}
                 className={`px-4 py-2 font-semibold border-b-2 transition whitespace-nowrap ${
                   activeTab === tab
-                    ? 'border-indigo-600 text-indigo-600'
+                    ? 'border-[#007A5E] text-[#007A5E]'
                     : 'border-transparent text-gray-600 hover:text-gray-900'
                 }`}
               >
@@ -524,7 +520,7 @@ export default function AdminDashboard() {
                 {stats.pendingListings > 0 && (
                   <button
                     onClick={() => setActiveTab('listings')}
-                    className="mt-2 text-sm text-indigo-600 hover:text-indigo-700 font-semibold"
+                    className="mt-2 text-sm text-[#007A5E] hover:text-[#005F48] font-semibold"
                   >
                     Review →
                   </button>
@@ -541,7 +537,7 @@ export default function AdminDashboard() {
                 {stats.pendingReviews > 0 && (
                   <button
                     onClick={() => setActiveTab('reviews')}
-                    className="mt-2 text-sm text-indigo-600 hover:text-indigo-700 font-semibold"
+                    className="mt-2 text-sm text-[#007A5E] hover:text-[#005F48] font-semibold"
                   >
                     Review →
                   </button>
@@ -555,7 +551,7 @@ export default function AdminDashboard() {
                 {stats.pendingClaims > 0 && (
                   <button
                     onClick={() => setActiveTab('claims')}
-                    className="mt-2 text-sm text-indigo-600 hover:text-indigo-700 font-semibold"
+                    className="mt-2 text-sm text-[#007A5E] hover:text-[#005F48] font-semibold"
                   >
                     Review →
                   </button>
@@ -574,10 +570,10 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <Link
                   href="/dashboard/import"
-                  className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-indigo-600 hover:shadow-lg transition group"
+                  className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-[#007A5E] hover:shadow-lg transition group"
                 >
                   <div className="text-4xl mb-3">📤</div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#007A5E]">
                     Import CSV
                   </h3>
                   <p className="text-gray-600">Bulk upload businesses</p>
@@ -585,10 +581,10 @@ export default function AdminDashboard() {
 
                 <Link
                   href="/add-listing"
-                  className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-indigo-600 hover:shadow-lg transition group"
+                  className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-[#007A5E] hover:shadow-lg transition group"
                 >
                   <div className="text-4xl mb-3">➕</div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#007A5E]">
                     Add Listing
                   </h3>
                   <p className="text-gray-600">Create a new business</p>
@@ -607,10 +603,10 @@ export default function AdminDashboard() {
 
                 <button
                   onClick={() => setActiveTab('reviews')}
-                  className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-indigo-600 hover:shadow-lg transition group text-left"
+                  className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-[#007A5E] hover:shadow-lg transition group text-left"
                 >
                   <div className="text-4xl mb-3">⭐</div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-600">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#007A5E]">
                     Moderate Reviews
                   </h3>
                   <p className="text-gray-600">Approve or reject reviews</p>
@@ -682,7 +678,7 @@ export default function AdminDashboard() {
                               <a href={`/listing/${review.listing.slug}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-indigo-600 hover:text-indigo-700"
+                              className="text-[#007A5E] hover:text-[#005F48]"
                             >
                               <ExternalLink className="w-4 h-4" />
                             </a>
@@ -785,7 +781,7 @@ export default function AdminDashboard() {
               <h2 className="text-2xl font-bold text-gray-900">All Listings</h2>
               <Link
                 href="/add-listing"
-                className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition"
+                className="bg-[#007A5E] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#005F48] transition"
               >
                 + Add Listing
               </Link>
@@ -804,7 +800,7 @@ export default function AdminDashboard() {
                     value={listingSearch}
                     onChange={(e) => setListingSearch(e.target.value)}
                     placeholder="Search by business name, category, or parish..."
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-indigo-600 focus:outline-none"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#007A5E] focus:outline-none"
                   />
                 </div>
 
@@ -816,7 +812,7 @@ export default function AdminDashboard() {
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-indigo-600 focus:outline-none"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#007A5E] focus:outline-none"
                   >
                     <option value="all">All Status</option>
                     <option value="active">Active Only</option>
@@ -958,7 +954,7 @@ export default function AdminDashboard() {
                             <Link
                               href={`/listing/${listing.slug}`}
                               target="_blank"
-                              className="text-indigo-600 hover:text-indigo-700 font-semibold text-xs"
+                              className="text-[#007A5E] hover:text-[#005F48] font-semibold text-xs"
                             >
                               View
                             </Link>
@@ -1001,7 +997,7 @@ export default function AdminDashboard() {
                         setListingSearch('')
                         setStatusFilter('all')
                       }}
-                      className="text-indigo-600 hover:text-indigo-700 font-semibold"
+                      className="text-[#007A5E] hover:text-[#005F48] font-semibold"
                     >
                       Clear filters
                     </button>
@@ -1117,7 +1113,7 @@ export default function AdminDashboard() {
                         <td className="px-6 py-4">
                           <button
                             onClick={() => handleChangeUserRole(userItem.id, userItem.full_name || userItem.email, userItem.role)}
-                            className="text-indigo-600 hover:text-indigo-700 font-semibold text-sm"
+                            className="text-[#007A5E] hover:text-[#005F48] font-semibold text-sm"
                           >
                             Change Role
                           </button>
