@@ -110,7 +110,7 @@ export default function AdminDashboard() {
       .from('listings')
       .select(`
         *,
-        category:categories(name, icon_emoji),
+        category:categories(name, icon),
         parish:parishes(name)
       `)
       .order('created_at', { ascending: false })
@@ -892,7 +892,7 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-6 py-4">
                           <span className="text-sm">
-                            {listing.category?.icon_emoji} {listing.category?.name}
+                            {listing.category?.icon} {listing.category?.name}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-600">

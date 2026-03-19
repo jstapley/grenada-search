@@ -52,7 +52,7 @@ export default function ClaimListingPage() {
       .from('listings')
       .select(`
         *,
-        category:categories(name, icon_emoji),
+        category:categories(name, icon),
         parish:parishes(name)
       `)
       .eq('status', 'active')
@@ -199,7 +199,7 @@ export default function ClaimListingPage() {
                 <option value="">All Categories</option>
                 {categories.map(cat => (
                   <option key={cat.id} value={cat.id}>
-                    {cat.icon_emoji} {cat.name}
+                    {cat.icon} {cat.name}
                   </option>
                 ))}
               </select>
@@ -249,7 +249,7 @@ export default function ClaimListingPage() {
                       />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-6xl">{listing.category?.icon_emoji || '🏢'}</span>
+                        <span className="text-6xl">{listing.category?.icon || '🏢'}</span>
                       </div>
                     )}
                   </div>
@@ -259,7 +259,7 @@ export default function ClaimListingPage() {
                     </h3>
                     {listing.category && (
                       <div className="text-sm text-indigo-600 font-semibold mb-2">
-                        {listing.category.icon_emoji} {listing.category.name}
+                        {listing.category.icon} {listing.category.name}
                       </div>
                     )}
                     {listing.parish && (

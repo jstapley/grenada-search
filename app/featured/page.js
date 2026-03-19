@@ -14,7 +14,7 @@ export default async function FeaturedPage() {
     .from('listings')
     .select(`
       *,
-      category:categories(name, icon_emoji),
+      category:categories(name, icon),
       parish:parishes(name)
     `)
     .eq('status', 'active')

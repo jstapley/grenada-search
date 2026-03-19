@@ -97,7 +97,7 @@ export default function CategoryPageClient({ category, listings, parishes }) {
       <section className="bg-[#007A5E] py-8 md:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-4xl md:text-6xl">{category.icon_emoji}</span>
+            <span className="text-4xl md:text-6xl">{category.icon}</span>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white">{category.name}</h1>
           </div>
           {category.description && (
@@ -141,7 +141,7 @@ export default function CategoryPageClient({ category, listings, parishes }) {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {listings.length === 0 ? (
           <div className="text-center py-12 md:py-16">
-            <div className="text-5xl md:text-6xl mb-4">{category.icon_emoji}</div>
+            <div className="text-5xl md:text-6xl mb-4">{category.icon}</div>
             <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">No {category.name.toLowerCase()} yet</h3>
             <p className="text-gray-600 mb-6 text-sm md:text-base px-4">Be the first business in this category to get listed!</p>
             <Link href="/add-listing" className="inline-block bg-[#007A5E] text-white px-6 md:px-8 py-3 rounded-lg font-semibold hover:bg-[#005F48] transition text-sm md:text-base">
@@ -171,7 +171,7 @@ export default function CategoryPageClient({ category, listings, parishes }) {
                     </div>
                   ) : (
                     <div className="aspect-video bg-[#E8F5F1] flex items-center justify-center relative">
-                      <span className="text-5xl md:text-6xl">{category.icon_emoji}</span>
+                      <span className="text-5xl md:text-6xl">{category.icon}</span>
                       {listing.featured && (
                         <div className="absolute top-2 md:top-3 right-2 md:right-3 bg-[#FCD116] text-[#1a1a1a] px-2 md:px-3 py-1 rounded-full text-xs font-bold">
                           ⭐ Featured

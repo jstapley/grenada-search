@@ -231,7 +231,7 @@ export default function HomeClient({ stats, parishes, categories, featuredListin
                       <Image src={listing.image_url} alt={listing.business_name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-6xl md:text-7xl">
-                        {listing.category?.icon_emoji || '🏢'}
+                        {listing.category?.icon || '🏢'}
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
@@ -241,7 +241,7 @@ export default function HomeClient({ stats, parishes, categories, featuredListin
                       {listing.business_name}
                     </h4>
                     <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                      <span className="flex items-center gap-1">{listing.category?.icon_emoji} {listing.category?.name}</span>
+                      <span className="flex items-center gap-1">{listing.category?.icon} {listing.category?.name}</span>
                       <span className="flex items-center gap-1">📍 {listing.parish?.name}</span>
                     </div>
                     <p className="text-gray-700 mb-4 line-clamp-2 text-sm md:text-base">
@@ -289,7 +289,7 @@ export default function HomeClient({ stats, parishes, categories, featuredListin
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {categories.slice(0, 8).map((category) => (
               <Link key={category.id} href={`/category/${category.slug}`} className="bg-white border-2 border-gray-200 rounded-xl p-6 md:p-8 text-center hover:shadow-2xl hover:border-[#007A5E] transition-all duration-300 group">
-                <div className="text-4xl md:text-5xl mb-3 md:mb-4">{category.icon_emoji}</div>
+                <div className="text-4xl md:text-5xl mb-3 md:mb-4">{category.icon}</div>
                 <h4 className="font-bold text-base md:text-lg text-gray-900 mb-2 group-hover:text-[#007A5E] transition">{category.name}</h4>
                 <div className="text-gray-600 font-semibold text-sm md:text-base">{category.listing_count} listings</div>
               </Link>

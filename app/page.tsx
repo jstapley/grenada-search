@@ -91,7 +91,7 @@ export default async function HomePage() {
       .from('listings')
       .select(`
         *,
-        category:categories(name, icon_emoji),
+        category:categories(name, icon),
         parish:parishes(name)
       `)
       .eq('status', 'active')
@@ -116,7 +116,7 @@ export default async function HomePage() {
     id: category.id,
     name: category.name,
     slug: category.slug,
-    icon_emoji: category.icon_emoji,
+    icon: category.icon,
     listing_count: category.listings?.length || 0
   })) || []
 

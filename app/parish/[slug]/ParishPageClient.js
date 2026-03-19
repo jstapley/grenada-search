@@ -203,7 +203,7 @@ export default function ParishPageClient({ parish, listings, categories }) {
                   href={`/category/${category.slug}`}
                   className="inline-flex items-center gap-2 bg-gray-100 hover:bg-indigo-100 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-medium text-gray-700 hover:text-indigo-700 transition"
                 >
-                  <span>{category.icon_emoji}</span>
+                  <span>{category.icon}</span>
                   <span>{category.name}</span>
                 </Link>
               ))}
@@ -254,7 +254,7 @@ export default function ParishPageClient({ parish, listings, categories }) {
                     </div>
                   ) : (
                     <div className="aspect-video bg-gradient-to-br from-indigo-100 to-blue-100 flex items-center justify-center relative">
-                      <span className="text-5xl md:text-6xl">{listing.category?.icon_emoji || '🏢'}</span>
+                      <span className="text-5xl md:text-6xl">{listing.category?.icon || '🏢'}</span>
                       {listing.featured && (
                         <div className="absolute top-2 md:top-3 right-2 md:right-3 bg-yellow-400 text-indigo-900 px-2 md:px-3 py-1 rounded-full text-xs font-bold">
                           ⭐ Featured
@@ -268,7 +268,7 @@ export default function ParishPageClient({ parish, listings, categories }) {
                         {listing.business_name}
                       </h3>
                       {listing.category && (
-                        <span className="text-xl md:text-2xl ml-2">{listing.category.icon_emoji}</span>
+                        <span className="text-xl md:text-2xl ml-2">{listing.category.icon}</span>
                       )}
                     </div>
                     {listing.category && (

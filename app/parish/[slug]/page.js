@@ -55,7 +55,7 @@ async function getParish(slug) {
 async function getListings(parishId) {
   const { data: listings } = await supabase
     .from('listings')
-    .select(`*, category:categories(name, icon_emoji)`)
+    .select(`*, category:categories(name, icon)`)
     .eq('parish_id', parishId)
     .eq('status', 'active')
     .order('featured', { ascending: false })
@@ -66,7 +66,7 @@ async function getListings(parishId) {
 async function getCategories(parishId) {
   const { data: categories } = await supabase
     .from('listings')
-    .select('category:categories(id, name, slug, icon_emoji)')
+    .select('category:categories(id, name, slug, icon)')
     .eq('parish_id', parishId)
     .eq('status', 'active')
   

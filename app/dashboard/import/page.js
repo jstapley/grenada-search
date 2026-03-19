@@ -390,7 +390,7 @@ export default function ImportPage() {
             <div className="space-y-1">
               {categories.map(cat => (
                 <div key={cat.id} className="text-sm text-gray-700">
-                  {cat.icon_emoji} {cat.name}
+                  {cat.icon} {cat.name}
                 </div>
               ))}
             </div>

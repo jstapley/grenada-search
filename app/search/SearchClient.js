@@ -49,7 +49,7 @@ export default function SearchClient() {
     try {
       let q = supabase
         .from('listings')
-        .select(`*, category:categories(name, icon_emoji), parish:parishes(name)`)
+        .select(`*, category:categories(name, icon), parish:parishes(name)`)
         .eq('status', 'active')
 
       if (searchTerm) {
@@ -323,7 +323,7 @@ export default function SearchClient() {
                           <Image src={listing.image_url} alt={listing.business_name} fill className="object-cover group-hover:scale-110 transition-transform duration-300" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-5xl md:text-6xl">
-                            {listing.category?.icon_emoji || '🏢'}
+                            {listing.category?.icon || '🏢'}
                           </div>
                         )}
                       </div>
@@ -340,7 +340,7 @@ export default function SearchClient() {
                           )}
                         </div>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3 text-xs md:text-sm text-gray-600">
-                          <span className="flex items-center gap-1">{listing.category?.icon_emoji} {listing.category?.name}</span>
+                          <span className="flex items-center gap-1">{listing.category?.icon} {listing.category?.name}</span>
                           <span className="flex items-center gap-1">📍 {listing.parish?.name}</span>
                         </div>
                         <p className="text-gray-700 mb-4 line-clamp-2 text-sm md:text-base">

@@ -219,7 +219,7 @@ export default function ListingDetailClient({ listing, isClaimed, relatedListing
               </div>
             ) : (
               <div className="aspect-video bg-gradient-to-br from-indigo-100 to-blue-100 rounded-2xl flex items-center justify-center mb-6 relative">
-                <span className="text-6xl md:text-9xl">{listing.category?.icon_emoji || '🏢'}</span>
+                <span className="text-6xl md:text-9xl">{listing.category?.icon || '🏢'}</span>
                 {listing.featured && (
                   <div className="absolute top-2 md:top-4 right-2 md:right-4 bg-yellow-400 text-indigo-900 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-bold">
                     ⭐ Featured
@@ -239,7 +239,7 @@ export default function ListingDetailClient({ listing, isClaimed, relatedListing
                     href={`/category/${listing.category.slug}`}
                     className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-semibold hover:bg-indigo-200 transition"
                   >
-                    <span>{listing.category.icon_emoji}</span>
+                    <span>{listing.category.icon}</span>
                     <span>{listing.category.name}</span>
                   </Link>
                 )}
@@ -378,7 +378,7 @@ export default function ListingDetailClient({ listing, isClaimed, relatedListing
                     </div>
                   ) : (
                     <div className="aspect-video bg-gradient-to-br from-indigo-100 to-blue-100 flex items-center justify-center">
-                      <span className="text-5xl md:text-6xl">{related.category?.icon_emoji || '🏢'}</span>
+                      <span className="text-5xl md:text-6xl">{related.category?.icon || '🏢'}</span>
                     </div>
                   )}
                   <div className="p-4 md:p-6">

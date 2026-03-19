@@ -307,7 +307,7 @@ export default function ScraperPage() {
                 <option value="">Select a category</option>
                 {categories.map(cat => (
                   <option key={cat.id} value={cat.id}>
-                    {cat.icon_emoji} {cat.name}
+                    {cat.icon} {cat.name}
                   </option>
                 ))}
               </select>

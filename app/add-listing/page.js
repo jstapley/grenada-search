@@ -322,7 +322,7 @@ export default function AddListingPage() {
             <label className="block text-sm font-bold text-gray-900 mb-2">Category *</label>
             <select name="category_id" value={formData.category_id} onChange={handleChange} required className={inputClass}>
               <option value="">Select a category</option>
-              {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.icon_emoji} {cat.name}</option>)}
+              {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.icon} {cat.name}</option>)}
             </select>
           </div>
 

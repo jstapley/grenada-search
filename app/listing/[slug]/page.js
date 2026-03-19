@@ -36,16 +36,14 @@ export async function generateMetadata({ params }) {
     .single()
 
   if (!listing) {
-    return {
-      title: 'Business Not Found'
-    }
+    return { title: 'Business Not Found' }
   }
 
   const title = listing.meta_title || `${listing.business_name} | ${listing.category?.name} in ${listing.parish?.name}, Grenada`
   const description = listing.meta_description || 
-  listing.description?.substring(0, 155) || 
-  listing.short_description || 
-  `Discover ${listing.business_name}, a ${listing.category?.name} in ${listing.parish?.name}, Grenada. Contact us for more information.`
+    listing.description?.substring(0, 155) || 
+    listing.short_description || 
+    `Discover ${listing.business_name}, a ${listing.category?.name} in ${listing.parish?.name}, Grenada. Contact us for more information.`
 
   return {
     title,
@@ -59,31 +57,21 @@ export async function generateMetadata({ params }) {
       'business',
       'tourism'
     ].filter(Boolean).join(', '),
-    
     openGraph: {
       type: 'website', 
       url: `https://www.grenadasearch.com/listing/${listing.slug}`,
       title: listing.business_name,
       description: description,
       siteName: 'GrenadaSearch.com',
-      images: listing.image_url ? [
-        {
-          url: listing.image_url,
-          width: 1200,
-          height: 630,
-          alt: listing.business_name
-        }
-      ] : [],
+      images: listing.image_url ? [{ url: listing.image_url, width: 1200, height: 630, alt: listing.business_name }] : [],
       locale: 'en_US'
     },
-
     twitter: {
       card: 'summary_large_image',
       title: listing.business_name,
       description: description,
       images: listing.image_url ? [listing.image_url] : []
     },
-
     alternates: {
       canonical: `https://www.grenadasearch.com/listing/${listing.slug}`
     }
@@ -91,22 +79,23 @@ export async function generateMetadata({ params }) {
 }
 
 async function getListing(slug) {
-  const { data: listing } = await supabase
+  const { data: listing, error } = await supabase
     .from('listings')
     .select(`
       *,
-      category:categories(id, name, slug, icon_emoji),
+      category:categories(id, name, slug, icon),
       parish:parishes(id, name, slug)
     `)
     .eq('slug', slug)
     .eq('status', 'active')
     .single()
   
+  console.log('getListing result:', { slug, listing: !!listing, error })
   return listing
 }
 
 async function checkIfClaimed(listingId) {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('claimed_listings')
     .select('id')
     .eq('listing_id', listingId)
@@ -119,7 +108,7 @@ async function getRelatedListings(categoryId, parishId, currentListingId) {
     .from('listings')
     .select(`
       *,
-      category:categories(name, icon_emoji),
+      category:categories(name, icon),
       parish:parishes(name, slug)
     `)
     .eq('status', 'active')
@@ -185,39 +174,16 @@ export default async function ListingPage({ params }) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Home",
-        "item": "https://www.grenadasearch.com"
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": listing.category?.name || "Category",
-        "item": `https://www.grenadasearch.com/category/${listing.category?.slug}`
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "name": listing.business_name,
-        "item": `https://www.grenadasearch.com/listing/${listing.slug}`
-      }
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.grenadasearch.com" },
+      { "@type": "ListItem", "position": 2, "name": listing.category?.name || "Category", "item": `https://www.grenadasearch.com/category/${listing.category?.slug}` },
+      { "@type": "ListItem", "position": 3, "name": listing.business_name, "item": `https://www.grenadasearch.com/listing/${listing.slug}` }
     ]
   }
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
-      />
-      
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-      
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <ListingDetailClient 
         listing={listing}
         isClaimed={isClaimed}
@@ -225,20 +191,4 @@ export default async function ListingPage({ params }) {
       />
     </>
   )
-}
-
-async function getListing(slug) {
-  const { data: listing, error } = await supabase
-    .from('listings')
-    .select(`
-      *,
-      category:categories(id, name, slug, icon_emoji),
-      parish:parishes(id, name, slug)
-    `)
-    .eq('slug', slug)
-    .eq('status', 'active')
-    .single()
-  
-  console.log('getListing result:', { slug, listing: !!listing, error })
-  return listing
 }

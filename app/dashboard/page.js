@@ -43,7 +43,7 @@ export default function DashboardPage() {
         *,
         listing:listings(
           id, business_name, slug, short_description, address, status,
-          category:categories(name, icon_emoji),
+          category:categories(name, icon),
           parish:parishes(name)
         )
       `)
@@ -183,7 +183,7 @@ export default function DashboardPage() {
                 return (
                   <div key={claim.id} className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition">
                     <div className="aspect-video bg-[#E8F5F1] flex items-center justify-center">
-                      <span className="text-6xl">{claim.listing.category?.icon_emoji || '🏢'}</span>
+                      <span className="text-6xl">{claim.listing.category?.icon || '🏢'}</span>
                     </div>
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-2">

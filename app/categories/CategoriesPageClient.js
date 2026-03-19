@@ -111,7 +111,7 @@ export default function CategoriesPageClient({ categories }) {
               href={`/category/${category.slug}`}
               className="bg-white border-2 border-gray-200 rounded-xl p-6 md:p-8 text-center hover:shadow-2xl hover:border-[#007A5E] transition-all duration-300 group"
             >
-              <div className="text-4xl md:text-6xl mb-3 md:mb-4">{category.icon_emoji}</div>
+              <div className="text-4xl md:text-6xl mb-3 md:mb-4">{category.icon}</div>
               <h2 className="font-bold text-base md:text-xl text-gray-900 mb-2 group-hover:text-[#007A5E] transition">
                 {category.name}
               </h2>

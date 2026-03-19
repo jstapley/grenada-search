@@ -108,7 +108,7 @@ export default function FeaturedPageClient({ featuredListings }) {
                     <Image src={listing.image_url} alt={listing.business_name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-6xl md:text-7xl">
-                      {listing.category?.icon_emoji || '🏢'}
+                      {listing.category?.icon || '🏢'}
                     </div>
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
@@ -118,7 +118,7 @@ export default function FeaturedPageClient({ featuredListings }) {
                     {listing.business_name}
                   </h3>
                   <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                    <span className="flex items-center gap-1">{listing.category?.icon_emoji} {listing.category?.name}</span>
+                    <span className="flex items-center gap-1">{listing.category?.icon} {listing.category?.name}</span>
                     <span className="flex items-center gap-1">📍 {listing.parish?.name}</span>
                   </div>
                   <p className="text-gray-700 mb-4 line-clamp-2 text-sm md:text-base">
