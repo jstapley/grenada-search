@@ -115,9 +115,6 @@ export default function CategoriesPageClient({ categories }) {
               <h2 className="font-bold text-base md:text-xl text-gray-900 mb-2 group-hover:text-[#007A5E] transition">
                 {category.name}
               </h2>
-              <div className="text-gray-600 font-semibold mb-3 md:mb-4 text-sm md:text-base">
-                {category.listing_count} listings
-              </div>
               <div className="text-[#007A5E] font-bold text-xs md:text-sm group-hover:translate-y-1 transition-transform">
                 Explore ↓
               </div>

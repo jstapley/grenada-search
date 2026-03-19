@@ -37,7 +37,7 @@ async function getCategories() {
   const { data: categories } = await supabase
     .from('categories')
     .select('*')
-    .order('listing_count', { ascending: false })
+    .order('name', { ascending: true })
   
   return categories || []
 }
