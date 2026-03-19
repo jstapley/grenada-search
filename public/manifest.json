@@ -1,40 +1,16 @@
 {
-  "name": "AntiguaSearch - Business Directory",
-  "short_name": "AntiguaSearch",
-  "description": "Find local businesses, hotels, restaurants, and services in Antigua & Barbuda",
+  "name": "GrenadaSearch - Business Directory",
+  "short_name": "GrenadaSearch",
+  "description": "Find local businesses, hotels, restaurants, and services in Grenada",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#4F46E5",
-  "theme_color": "#4F46E5",
+  "background_color": "#007A5E",
+  "theme_color": "#007A5E",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en-US",
   "dir": "ltr",
   "icons": [
-    {
-      "src": "/icon-72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/grenada-flag.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any"
-    },
     {
       "src": "/apple-touch-icon.png",
       "sizes": "152x152",
@@ -48,24 +24,10 @@
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
       "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshot-mobile.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow"
     }
   ],
   "categories": ["business", "travel", "lifestyle"],
@@ -73,38 +35,23 @@
     {
       "name": "Search Businesses",
       "short_name": "Search",
-      "description": "Search for businesses in Antigua",
+      "description": "Search for businesses in Grenada",
       "url": "/search",
-      "icons": [
-        {
-          "src": "/android-chrome-192x192.png",
-          "sizes": "192x192"
-        }
-      ]
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
     },
     {
       "name": "Browse Categories",
       "short_name": "Categories",
       "description": "Browse by category",
       "url": "/categories",
-      "icons": [
-        {
-          "src": "/android-chrome-192x192.png",
-          "sizes": "192x192"
-        }
-      ]
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
     },
     {
       "name": "Add Business",
       "short_name": "Add",
-      "description": "List your business",
+      "description": "List your business in Grenada",
       "url": "/add-listing",
-      "icons": [
-        {
-          "src": "/android-chrome-192x192.png",
-          "sizes": "192x192"
-        }
-      ]
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
     }
   ]
 }
