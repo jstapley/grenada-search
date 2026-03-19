@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/lib/AuthContext";
 import "./globals.css";
 import GoogleAnalytics from '@/components/GoogleAnalytics'
+import Script from 'next/script'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,7 +46,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="GrenadaSearch" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="theme-color" content="#4F46E5" />
+        <meta name="theme-color" content="#007A5E" />
 
         {/* Apple Touch Icons */}
         <link rel="apple-touch-icon" href="/android-chrome-192x192.png" />
@@ -54,31 +55,11 @@ export default function RootLayout({
         <link rel="apple-touch-icon" sizes="167x167" href="/android-chrome-192x192.png" />
 
         {/* Splash Screens for iOS */}
-        <link
-          rel="apple-touch-startup-image"
-          href="/splash-640x1136.png"
-          media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)"
-        />
-        <link
-          rel="apple-touch-startup-image"
-          href="/splash-750x1334.png"
-          media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)"
-        />
-        <link
-          rel="apple-touch-startup-image"
-          href="/splash-1242x2208.png"
-          media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)"
-        />
-        <link
-          rel="apple-touch-startup-image"
-          href="/splash-1125x2436.png"
-          media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)"
-        />
-        <link
-          rel="apple-touch-startup-image"
-          href="/splash-1242x2688.png"
-          media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)"
-        />
+        <link rel="apple-touch-startup-image" href="/splash-640x1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" />
+        <link rel="apple-touch-startup-image" href="/splash-750x1334.png" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" />
+        <link rel="apple-touch-startup-image" href="/splash-1242x2208.png" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" />
+        <link rel="apple-touch-startup-image" href="/splash-1125x2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" />
+        <link rel="apple-touch-startup-image" href="/splash-1242x2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" />
 
         {/* Ahrefs Analytics */}
         <script
@@ -87,7 +68,7 @@ export default function RootLayout({
               var ahrefs_analytics_script = document.createElement('script');
               ahrefs_analytics_script.async = true;
               ahrefs_analytics_script.src = 'https://analytics.ahrefs.com/analytics.js';
-              ahrefs_analytics_script.setAttribute('data-key', 'VdU31toSJ2MPWPmgXw4rWw');
+              ahrefs_analytics_script.setAttribute('data-key', 'rodU+AMsCvB8R6qp8uIQCQ');
               document.getElementsByTagName('head')[0].appendChild(ahrefs_analytics_script);
             `
           }}
@@ -113,9 +94,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {/* Google Analytics */}
         {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
           <GoogleAnalytics measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID} />

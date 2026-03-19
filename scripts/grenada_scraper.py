@@ -23,7 +23,7 @@ from slugify import slugify
 # ------------------------------------------------------------------ #
 
 API_KEY      = "AIzaSyAcfi9SAA0cKz30nkSLMSEcS6roWX2hB4E"
-TARGET_TOTAL = 200
+TARGET_TOTAL = 3000
 OUTPUT_FILE  = "grenada_listings_seed.csv"
 DELAY        = 0.5    # seconds between API calls
 
@@ -329,7 +329,15 @@ def main():
     collected = {}
 
     print("── Phase 1: Parish sweep ──────────────────────────")
-    parish_queries = [f"businesses in {p['name']} Grenada" for p in PARISHES]
+    parish_queries = []
+    for p in PARISHES:
+        parish_queries.extend([
+            f"businesses in {p['name']} Grenada",
+            f"restaurants in {p['name']} Grenada",
+            f"hotels in {p['name']} Grenada",
+            f"shops in {p['name']} Grenada",
+            f"services in {p['name']} Grenada",
+        ])
     collected = collect_place_ids(parish_queries, TARGET_TOTAL, collected)
     print(f"  Phase 1 done: {len(collected)} unique place IDs\n")
 
