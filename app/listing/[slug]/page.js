@@ -90,7 +90,6 @@ async function getListing(slug) {
     .eq('status', 'active')
     .single()
   
-  console.log('getListing result:', { slug, listing: !!listing, error })
   return listing
 }
 
