@@ -226,3 +226,19 @@ export default async function ListingPage({ params }) {
     </>
   )
 }
+
+async function getListing(slug) {
+  const { data: listing, error } = await supabase
+    .from('listings')
+    .select(`
+      *,
+      category:categories(id, name, slug, icon_emoji),
+      parish:parishes(id, name, slug)
+    `)
+    .eq('slug', slug)
+    .eq('status', 'active')
+    .single()
+  
+  console.log('getListing result:', { slug, listing: !!listing, error })
+  return listing
+}
