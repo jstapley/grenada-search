@@ -81,7 +81,7 @@ export default function AdminDashboard() {
   const loadAllData = async () => {
     setLoadingData(true)
     
-    const { data: allListings } = await supabase.from('listings').select('status')
+    const { data: allListings } = await supabase.from('listings').select('status').limit(5000)
     const { data: allUsers } = await supabase.from('user_profiles').select('id')
     const { data: allCategories } = await supabase.from('categories').select('id')
     const { data: pendingClaims } = await supabase
