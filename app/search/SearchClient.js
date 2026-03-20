@@ -399,20 +399,21 @@ export default function SearchClient() {
               <p className="text-gray-400 text-sm mb-2">contact@grenadasearch.com</p>
               <p className="text-gray-400 text-sm">St. George&apos;s, Grenada</p>
             </div>
-          </div>
-          <div className="border-t border-gray-800 pt-6 md:pt-8 text-center">
-            <p className="text-gray-400 text-sm">© 2026 GrenadaSearch.com. All rights reserved.</p>
-          </div>
-          <div>
+                      <div>
             <h6 className="font-bold mb-4 text-base md:text-lg">Websites</h6>
             <div className="space-y-2 text-sm">
               <a href="https://www.grenadasearch.com" className="block text-gray-400 hover:text-white transition">GrenadaSearch.com</a>
               <a href="https://www.antiguasearch.com" className="block text-gray-400 hover:text-white transition">AntiguaSearch.com</a>
-              <a href="https://www.stapleying.com" className="block text-gray-400 hover:text-white transition">StapleyInc.com</a>
+              <a href="https://www.stapleyinc.com" className="block text-gray-400 hover:text-white transition">StapleyInc.com</a>
               <a href="https://www.antiguamarinesolutions.com" className="block text-gray-400 hover:text-white transition">AntiguaMarineSolutions.com</a>
             </div>
           </div>
         </div>
+          </div>
+          <div className="border-t border-gray-800 pt-6 md:pt-8 text-center">
+            <p className="text-gray-400 text-sm">© 2026 GrenadaSearch.com. All rights reserved.</p>
+          </div>
+
       </footer>
     </div>
   )
