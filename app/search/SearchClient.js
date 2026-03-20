@@ -366,7 +366,7 @@ export default function SearchClient() {
 
       <footer className="bg-gray-900 text-white py-8 md:py-12 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <Image src="/grenada-flag.png" alt="Grenada Flag" width={40} height={40} className="rounded-full" />
@@ -402,6 +402,15 @@ export default function SearchClient() {
           </div>
           <div className="border-t border-gray-800 pt-6 md:pt-8 text-center">
             <p className="text-gray-400 text-sm">© 2026 GrenadaSearch.com. All rights reserved.</p>
+          </div>
+          <div>
+            <h6 className="font-bold mb-4 text-base md:text-lg">Websites</h6>
+            <div className="space-y-2 text-sm">
+              <a href="https://www.grenadasearch.com" className="block text-gray-400 hover:text-white transition">GrenadaSearch.com</a>
+              <a href="https://www.antiguasearch.com" className="block text-gray-400 hover:text-white transition">AntiguaSearch.com</a>
+              <a href="https://www.stapleying.com" className="block text-gray-400 hover:text-white transition">StapleyInc.com</a>
+              <a href="https://www.antiguamarinesolutions.com" className="block text-gray-400 hover:text-white transition">AntiguaMarineSolutions.com</a>
+            </div>
           </div>
         </div>
       </footer>
