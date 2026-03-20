@@ -169,7 +169,7 @@ export default function EditListingPage({ params }) {
 
       const google = await loader.load()
 
-      // Center on listing location or Antigua
+      // Center on listing location or Grenada
       const center = lat && lng 
         ? { lat, lng }
         : { lat: 17.0608, lng: -61.7964 }
@@ -475,14 +475,14 @@ export default function EditListingPage({ params }) {
             <Link href="/dashboard" className="flex items-center gap-3">
               <Image 
                 src="/grenada-flag.png" 
-                alt="Antigua Flag" 
+                alt="Grenada Flag" 
                 width={50} 
                 height={50}
                 className="rounded-full"
               />
               <div>
-                <div className="text-xl font-bold text-gray-900">ANTIGUA & BARBUDA</div>
-                <div className="text-sm text-indigo-600 font-semibold">ANTIGUA SEARCH</div>
+                <div className="text-xl font-bold text-gray-900">GRENADA</div>
+                <div className="text-sm text-indigo-600 font-semibold">GRENADA SEARCH</div>
               </div>
             </Link>
             <Link
