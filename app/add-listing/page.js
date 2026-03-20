@@ -93,28 +93,25 @@ export default function AddListingPage() {
       map.addListener('click', (e) => placeMarker(e.latLng, google))
       marker.addListener('dragend', (e) => updateLocation(e.latLng, google))
 
-    if (searchInputRef.current) {
-      const placeAutocomplete = new google.maps.places.PlaceAutocompleteElement({
-        includedRegionCodes: ['gd'],
-      })
+      if (searchInputRef.current) {
+        const autocomplete = new google.maps.places.Autocomplete(searchInputRef.current, {
+          componentRestrictions: { country: 'gd' },
+          fields: ['geometry', 'formatted_address', 'name']
+        })
 
-      placeAutocomplete.style.cssText = 'width: 100%; border: 2px solid #e5e7eb; border-radius: 0.5rem; padding: 0.625rem 1rem; font-size: 0.875rem; outline: none;'
-      
-      searchInputRef.current.parentNode.replaceChild(placeAutocomplete, searchInputRef.current)
+        autocomplete.addListener('place_changed', () => {
+          const place = autocomplete.getPlace()
+          if (place.geometry && place.geometry.location) {
+            placeMarker(place.geometry.location, google)
+            map.setCenter(place.geometry.location)
+            map.setZoom(16)
+            const address = place.formatted_address || place.name || ''
+            setFormData(prev => ({ ...prev, address }))
+          }
+        })
 
-      placeAutocomplete.addEventListener('gmp-placeselect', async ({ place }) => {
-        await place.fetchFields({ fields: ['geometry', 'formattedAddress', 'displayName'] })
-        
-        if (place.geometry?.location) {
-          placeMarker(place.geometry.location, google)
-          map.setCenter(place.geometry.location)
-          map.setZoom(16)
-          setFormData(prev => ({ ...prev, address: place.formattedAddress || place.displayName || '' }))
-        }
-      })
-
-      autocompleteRef.current = placeAutocomplete
-    }
+        autocompleteRef.current = autocomplete
+      }
 
       setMapLoaded(true)
     } catch (err) {
