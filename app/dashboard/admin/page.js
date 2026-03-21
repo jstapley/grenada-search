@@ -32,6 +32,21 @@ export default function AdminDashboard() {
   const [claims, setClaims] = useState([])
   const [users, setUsers] = useState([])
   const [reviews, setReviews] = useState([])
+  const [blogPosts, setBlogPosts] = useState([])
+  const [showBlogForm, setShowBlogForm] = useState(false)
+  const [editingPost, setEditingPost] = useState(null)
+  const [blogForm, setBlogForm] = useState({
+    title: '',
+    slug: '',
+    excerpt: '',
+    content: '',
+    featured_image: '',
+    author: 'GrenadaSearch Team',
+    status: 'draft',
+    meta_title: '',
+    meta_description: '',
+    tags: ''
+  })
   const [loadingData, setLoadingData] = useState(true)
   const [loadingReview, setLoadingReview] = useState(null)
   const [loadingListing, setLoadingListing] = useState(null)
@@ -110,7 +125,6 @@ export default function AdminDashboard() {
       .order('created_at', { ascending: false })
       .range(0, 4999)
 
-    console.log('Listings loaded:', listingsData?.length, listingsData?.[0])
     setListings(listingsData || [])
 
     const { data: claimsData } = await supabase
@@ -133,6 +147,12 @@ export default function AdminDashboard() {
       .select(`*, listing:listings(id, business_name, slug)`)
       .order('created_at', { ascending: false })
     setReviews(reviewsData || [])
+
+    const { data: blogData } = await supabase
+      .from('blog_posts')
+      .select('*')
+      .order('created_at', { ascending: false })
+    setBlogPosts(blogData || [])
 
     setLoadingData(false)
   }
@@ -288,9 +308,7 @@ export default function AdminDashboard() {
         .from('listings')
         .update({ featured: !currentFeatured })
         .eq('id', listingId)
-
       if (error) throw error
-
       showModal(
         currentFeatured ? 'Removed from Featured' : 'Added to Featured',
         `"${businessName}" has been ${currentFeatured ? 'removed from' : 'added to'} featured listings.`,
@@ -317,6 +335,86 @@ export default function AdminDashboard() {
           const { error } = await supabase.from('user_profiles').update({ role: newRole }).eq('id', userId)
           if (error) showModal('Error', 'Could not change role: ' + error.message, 'error')
           else showModal('Success', `Role changed to ${newRole}.`, 'success', loadAllData)
+        }
+      },
+      onClose: () => setModal(prev => ({ ...prev, isOpen: false }))
+    })
+  }
+
+  const generateBlogSlug = (title) =>
+    title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+
+  const handleBlogFormChange = (e) => {
+    const { name, value } = e.target
+    setBlogForm(prev => ({
+      ...prev,
+      [name]: value,
+      ...(name === 'title' && !editingPost ? { slug: generateBlogSlug(value) } : {})
+    }))
+  }
+
+  const handleEditPost = (post) => {
+    setEditingPost(post)
+    setBlogForm({
+      title: post.title,
+      slug: post.slug,
+      excerpt: post.excerpt || '',
+      content: post.content,
+      featured_image: post.featured_image || '',
+      author: post.author || 'GrenadaSearch Team',
+      status: post.status,
+      meta_title: post.meta_title || '',
+      meta_description: post.meta_description || '',
+      tags: post.tags ? post.tags.join(', ') : ''
+    })
+    setShowBlogForm(true)
+  }
+
+  const handleBlogSubmit = async () => {
+    if (!blogForm.title || !blogForm.content) {
+      showModal('Error', 'Title and content are required.', 'error')
+      return
+    }
+
+    const postData = {
+      ...blogForm,
+      tags: blogForm.tags ? blogForm.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+      published_at: blogForm.status === 'published' ? new Date().toISOString() : null,
+      updated_at: new Date().toISOString()
+    }
+
+    try {
+      if (editingPost) {
+        const { error } = await supabase.from('blog_posts').update(postData).eq('id', editingPost.id)
+        if (error) throw error
+        showModal('Updated', `"${blogForm.title}" has been updated.`, 'success', loadAllData)
+      } else {
+        const { error } = await supabase.from('blog_posts').insert([postData])
+        if (error) throw error
+        showModal('Saved', `"${blogForm.title}" has been saved.`, 'success', loadAllData)
+      }
+      setShowBlogForm(false)
+      setEditingPost(null)
+      setBlogForm({ title: '', slug: '', excerpt: '', content: '', featured_image: '', author: 'GrenadaSearch Team', status: 'draft', meta_title: '', meta_description: '', tags: '' })
+    } catch (error) {
+      showModal('Error', 'Could not save post: ' + error.message, 'error')
+    }
+  }
+
+  const handleDeletePost = (postId, postTitle) => {
+    setModal({
+      isOpen: true,
+      title: 'Delete Post?',
+      message: `Are you sure you want to permanently delete "${postTitle}"? This cannot be undone.`,
+      type: 'warning',
+      confirmButton: {
+        label: 'Yes, Delete',
+        danger: true,
+        onClick: async () => {
+          setModal(prev => ({ ...prev, isOpen: false }))
+          const { error } = await supabase.from('blog_posts').delete().eq('id', postId)
+          if (error) showModal('Error', 'Could not delete post: ' + error.message, 'error')
+          else showModal('Deleted', 'Post deleted successfully.', 'success', loadAllData)
         }
       },
       onClose: () => setModal(prev => ({ ...prev, isOpen: false }))
@@ -397,7 +495,7 @@ export default function AdminDashboard() {
 
         <div className="mb-8 border-b border-gray-200">
           <div className="flex gap-4 overflow-x-auto">
-            {['overview', 'listings', 'reviews', 'claims', 'users'].map(tab => (
+            {['overview', 'listings', 'reviews', 'claims', 'users', 'blog'].map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -410,6 +508,7 @@ export default function AdminDashboard() {
                 {tab === 'reviews' && `⭐ Reviews ${stats.pendingReviews > 0 ? `(${stats.pendingReviews})` : ''}`}
                 {tab === 'claims' && `🏢 Pending Claims ${stats.pendingClaims > 0 ? `(${stats.pendingClaims})` : ''}`}
                 {tab === 'users' && '👥 Users'}
+                {tab === 'blog' && `📝 Blog ${blogPosts.length > 0 ? `(${blogPosts.length})` : ''}`}
               </button>
             ))}
           </div>
@@ -470,12 +569,12 @@ export default function AdminDashboard() {
                   <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#007A5E]">AI Scraper</h3>
                   <p className="text-gray-600">Discover businesses with AI</p>
                 </Link>
-                <button onClick={() => setActiveTab('reviews')} className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-[#007A5E] hover:shadow-lg transition group text-left">
-                  <div className="text-4xl mb-3">⭐</div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#007A5E]">Moderate Reviews</h3>
-                  <p className="text-gray-600">Approve or reject reviews</p>
-                  {stats.pendingReviews > 0 && (
-                    <span className="inline-block mt-2 bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold">{stats.pendingReviews} pending</span>
+                <button onClick={() => setActiveTab('blog')} className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:border-[#007A5E] hover:shadow-lg transition group text-left">
+                  <div className="text-4xl mb-3">📝</div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#007A5E]">Blog Posts</h3>
+                  <p className="text-gray-600">Create and manage posts</p>
+                  {blogPosts.length > 0 && (
+                    <span className="inline-block mt-2 bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">{blogPosts.length} posts</span>
                   )}
                 </button>
               </div>
@@ -595,13 +694,9 @@ export default function AdminDashboard() {
               <div className="flex gap-4 items-end">
                 <div className="flex-1">
                   <label className="block text-sm font-bold text-gray-900 mb-2">🔍 Search Listings</label>
-                  <input
-                    type="text"
-                    value={listingSearch}
-                    onChange={(e) => setListingSearch(e.target.value)}
+                  <input type="text" value={listingSearch} onChange={(e) => setListingSearch(e.target.value)}
                     placeholder="Search by business name, category, or parish..."
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#007A5E] focus:outline-none"
-                  />
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#007A5E] focus:outline-none" />
                 </div>
                 <div className="w-64">
                   <label className="block text-sm font-bold text-gray-900 mb-2">Filter by Status</label>
@@ -682,7 +777,6 @@ export default function AdminDashboard() {
                                 <Check className="w-3 h-3" /> Approve
                               </button>
                             )}
-
                             <button
                               onClick={() => handleToggleFeatured(listing.id, listing.business_name, listing.featured)}
                               className={`font-semibold text-xs ${listing.featured ? 'text-yellow-600 hover:text-yellow-700' : 'text-gray-400 hover:text-yellow-600'}`}
@@ -690,8 +784,6 @@ export default function AdminDashboard() {
                               {listing.featured ? '⭐ Featured' : '☆ Feature'}
                             </button>
                             <Link href={`/listing/${listing.slug}`} target="_blank" className="text-[#007A5E] hover:text-[#005F48] font-semibold text-xs">View</Link>
-
-
                             <Link href={`/dashboard/edit/${listing.id}`} className="text-blue-600 hover:text-blue-700 font-semibold text-xs">Edit</Link>
                             <button onClick={() => handleDeleteListing(listing.id, listing.business_name)} className="text-red-600 hover:text-red-700 font-semibold text-xs">Delete</button>
                           </div>
@@ -700,15 +792,12 @@ export default function AdminDashboard() {
                     ))}
                   </tbody>
                 </table>
-
                 {filteredListings.length === 0 && (
                   <div className="p-12 text-center">
                     <div className="text-5xl mb-4">🔍</div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">No listings found</h3>
                     <p className="text-gray-600 mb-4">Try adjusting your search or filters</p>
-                    <button onClick={() => { setListingSearch(''); setStatusFilter('all') }} className="text-[#007A5E] hover:text-[#005F48] font-semibold">
-                      Clear filters
-                    </button>
+                    <button onClick={() => { setListingSearch(''); setStatusFilter('all') }} className="text-[#007A5E] hover:text-[#005F48] font-semibold">Clear filters</button>
                   </div>
                 )}
               </div>
@@ -735,20 +824,14 @@ export default function AdminDashboard() {
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-gray-900 mb-2">{claim.listing_id}</h3>
-                        <div className="text-gray-600 mb-2">
-                          <strong>Claimed by:</strong> {claim.claimant_name || 'Unknown'} ({claim.claimant_email || 'No email'})
-                        </div>
+                        <div className="text-gray-600 mb-2"><strong>Claimed by:</strong> {claim.claimant_name || 'Unknown'} ({claim.claimant_email || 'No email'})</div>
                         {claim.claimant_phone && <div className="text-gray-600 mb-2"><strong>Phone:</strong> {claim.claimant_phone}</div>}
                         {claim.message && <div className="text-gray-600 mb-2"><strong>Message:</strong> {claim.message}</div>}
                         <div className="text-sm text-gray-500">Submitted: {new Date(claim.created_at).toLocaleDateString()}</div>
                       </div>
                       <div className="flex gap-2">
-                        <button onClick={() => handleApproveClaim(claim.id)} className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition">
-                          ✓ Approve
-                        </button>
-                        <button onClick={() => handleRejectClaim(claim.id)} className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition">
-                          ✗ Reject
-                        </button>
+                        <button onClick={() => handleApproveClaim(claim.id)} className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition">✓ Approve</button>
+                        <button onClick={() => handleRejectClaim(claim.id)} className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition">✗ Reject</button>
                       </div>
                     </div>
                   </div>
@@ -792,6 +875,162 @@ export default function AdminDashboard() {
                             className="text-[#007A5E] hover:text-[#005F48] font-semibold text-sm">
                             Change Role
                           </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* BLOG TAB */}
+        {activeTab === 'blog' && (
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Blog Posts ({blogPosts.length})</h2>
+              <button
+                onClick={() => { setShowBlogForm(true); setEditingPost(null); setBlogForm({ title: '', slug: '', excerpt: '', content: '', featured_image: '', author: 'GrenadaSearch Team', status: 'draft', meta_title: '', meta_description: '', tags: '' }) }}
+                className="bg-[#007A5E] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#005F48] transition"
+              >
+                + New Post
+              </button>
+            </div>
+
+            {showBlogForm && (
+              <div className="bg-white rounded-xl border-2 border-[#007A5E] p-6 mb-8">
+                <h3 className="text-xl font-bold text-gray-900 mb-6">{editingPost ? 'Edit Post' : 'New Blog Post'}</h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-900 mb-2">Title *</label>
+                    <input type="text" name="title" value={blogForm.title} onChange={handleBlogFormChange}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#007A5E] focus:outline-none"
+                      placeholder="Post title" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-900 mb-2">Slug</label>
+                    <input type="text" name="slug" value={blogForm.slug} onChange={handleBlogFormChange}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#007A5E] focus:outline-none"
+                      placeholder="post-url-slug" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-900 mb-2">Author</label>
+                    <input type="text" name="author" value={blogForm.author} onChange={handleBlogFormChange}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#007A5E] focus:outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-900 mb-2">Status</label>
+                    <select name="status" value={blogForm.status} onChange={handleBlogFormChange}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#007A5E] focus:outline-none">
+                      <option value="draft">Draft</option>
+                      <option value="published">Published</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-900 mb-2">Featured Image URL</label>
+                    <input type="url" name="featured_image" value={blogForm.featured_image} onChange={handleBlogFormChange}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#007A5E] focus:outline-none"
+                      placeholder="https://..." />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-900 mb-2">Tags (comma separated)</label>
+                    <input type="text" name="tags" value={blogForm.tags} onChange={handleBlogFormChange}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#007A5E] focus:outline-none"
+                      placeholder="grenada, tourism, food" />
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <label className="block text-sm font-bold text-gray-900 mb-2">Excerpt</label>
+                  <textarea name="excerpt" value={blogForm.excerpt} onChange={handleBlogFormChange} rows="2"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#007A5E] focus:outline-none"
+                    placeholder="Short summary shown on the blog list page" />
+                </div>
+
+                <div className="mb-6">
+                  <label className="block text-sm font-bold text-gray-900 mb-2">Content (Markdown) *</label>
+                  <textarea name="content" value={blogForm.content} onChange={handleBlogFormChange} rows="20"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#007A5E] focus:outline-none font-mono text-sm"
+                    placeholder="Paste your markdown content here..." />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-900 mb-2">Meta Title</label>
+                    <input type="text" name="meta_title" value={blogForm.meta_title} onChange={handleBlogFormChange}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#007A5E] focus:outline-none"
+                      placeholder="SEO title (optional)" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-900 mb-2">Meta Description</label>
+                    <input type="text" name="meta_description" value={blogForm.meta_description} onChange={handleBlogFormChange}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#007A5E] focus:outline-none"
+                      placeholder="SEO description (optional)" />
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <button onClick={handleBlogSubmit}
+                    className="bg-[#007A5E] text-white px-8 py-3 rounded-lg font-bold hover:bg-[#005F48] transition">
+                    {editingPost ? 'Update Post' : 'Save Post'}
+                  </button>
+                  <button onClick={() => { setShowBlogForm(false); setEditingPost(null) }}
+                    className="bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-bold hover:bg-gray-300 transition">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {loadingData ? (
+              <div className="text-center py-12"><p className="text-gray-600">Loading posts...</p></div>
+            ) : blogPosts.length === 0 ? (
+              <div className="bg-white rounded-xl p-12 text-center border-2 border-dashed border-gray-300">
+                <div className="text-6xl mb-4">📝</div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">No Blog Posts Yet</h3>
+                <p className="text-gray-600">Click "+ New Post" to create your first blog post</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl border-2 border-gray-200 overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Title</th>
+                      <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Author</th>
+                      <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {blogPosts.map(post => (
+                      <tr key={post.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4">
+                          <div className="font-semibold text-gray-900">{post.title}</div>
+                          <div className="text-sm text-gray-500">/blog/{post.slug}</div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600">{post.author}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                            post.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                          }`}>
+                            {post.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600">
+                          {new Date(post.published_at || post.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex gap-3">
+                            <a href={`/blog/${post.slug}`} target="_blank" rel="noopener noreferrer"
+                              className="text-[#007A5E] hover:text-[#005F48] font-semibold text-xs">View</a>
+                            <button onClick={() => handleEditPost(post)}
+                              className="text-blue-600 hover:text-blue-700 font-semibold text-xs">Edit</button>
+                            <button onClick={() => handleDeletePost(post.id, post.title)}
+                              className="text-red-600 hover:text-red-700 font-semibold text-xs">Delete</button>
+                          </div>
                         </td>
                       </tr>
                     ))}
