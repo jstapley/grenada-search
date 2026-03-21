@@ -95,11 +95,9 @@ export default async function HomePage() {
         parish:parishes(name)
       `)
       .eq('status', 'active')
-      .eq('is_featured', true)
-      .gt('featured_until', new Date().toISOString())
-      .order('featured_position', { ascending: true })
+      .eq('featured', true)
       .order('created_at', { ascending: false })
-      .limit(3),
+      .limit(6),
     
     Promise.resolve({ count: 1247 })
   ])

@@ -282,6 +282,26 @@ export default function AdminDashboard() {
     })
   }
 
+  const handleToggleFeatured = async (listingId, businessName, currentFeatured) => {
+    try {
+      const { error } = await supabase
+        .from('listings')
+        .update({ featured: !currentFeatured })
+        .eq('id', listingId)
+
+      if (error) throw error
+
+      showModal(
+        currentFeatured ? 'Removed from Featured' : 'Added to Featured',
+        `"${businessName}" has been ${currentFeatured ? 'removed from' : 'added to'} featured listings.`,
+        'success',
+        loadAllData
+      )
+    } catch (error) {
+      showModal('Error', 'Could not update featured status: ' + error.message, 'error')
+    }
+  }
+
   const handleChangeUserRole = (userId, userName, currentRole) => {
     const newRole = currentRole === 'admin' ? 'business_owner' : 'admin'
     setModal({
@@ -662,7 +682,16 @@ export default function AdminDashboard() {
                                 <Check className="w-3 h-3" /> Approve
                               </button>
                             )}
+
+                            <button
+                              onClick={() => handleToggleFeatured(listing.id, listing.business_name, listing.featured)}
+                              className={`font-semibold text-xs ${listing.featured ? 'text-yellow-600 hover:text-yellow-700' : 'text-gray-400 hover:text-yellow-600'}`}
+                            >
+                              {listing.featured ? '⭐ Featured' : '☆ Feature'}
+                            </button>
                             <Link href={`/listing/${listing.slug}`} target="_blank" className="text-[#007A5E] hover:text-[#005F48] font-semibold text-xs">View</Link>
+
+
                             <Link href={`/dashboard/edit/${listing.id}`} className="text-blue-600 hover:text-blue-700 font-semibold text-xs">Edit</Link>
                             <button onClick={() => handleDeleteListing(listing.id, listing.business_name)} className="text-red-600 hover:text-red-700 font-semibold text-xs">Delete</button>
                           </div>
