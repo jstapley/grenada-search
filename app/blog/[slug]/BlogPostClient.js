@@ -88,18 +88,25 @@ export default function BlogPostClient({ post }) {
         )}
 
         {/* Content */}
-        <div className="prose prose-lg max-w-none
-          prose-headings:font-bold prose-headings:text-gray-900
-          prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
-          prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
-          prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-4
-          prose-a:text-[#007A5E] prose-a:font-semibold hover:prose-a:text-[#005F48]
-          prose-strong:text-gray-900
-          prose-ul:my-4 prose-li:text-gray-700
-          prose-blockquote:border-l-4 prose-blockquote:border-[#007A5E] prose-blockquote:pl-4 prose-blockquote:italic
-          prose-code:bg-gray-100 prose-code:px-1 prose-code:rounded
-          prose-hr:border-gray-200">
-          <ReactMarkdown>{post.content}</ReactMarkdown>
+        <div className="max-w-none text-gray-700">
+          <ReactMarkdown
+            components={{
+              h1: ({children}) => <h1 className="text-3xl font-extrabold text-gray-900 mt-10 mb-4">{children}</h1>,
+              h2: ({children}) => <h2 className="text-2xl font-bold text-gray-900 mt-10 mb-4 pb-2 border-b border-gray-200">{children}</h2>,
+              h3: ({children}) => <h3 className="text-xl font-bold text-gray-900 mt-8 mb-3">{children}</h3>,
+              p: ({children}) => <p className="text-gray-700 leading-relaxed mb-5 text-base md:text-lg">{children}</p>,
+              a: ({href, children}) => <a href={href} className="text-[#007A5E] font-semibold underline hover:text-[#005F48] transition">{children}</a>,
+              strong: ({children}) => <strong className="font-bold text-gray-900">{children}</strong>,
+              ul: ({children}) => <ul className="list-disc list-outside ml-6 mb-5 space-y-2">{children}</ul>,
+              ol: ({children}) => <ol className="list-decimal list-outside ml-6 mb-5 space-y-2">{children}</ol>,
+              li: ({children}) => <li className="text-gray-700 text-base md:text-lg leading-relaxed">{children}</li>,
+              blockquote: ({children}) => <blockquote className="border-l-4 border-[#007A5E] pl-4 italic text-gray-600 my-6 bg-[#F0FAF7] py-3 pr-4 rounded-r-lg">{children}</blockquote>,
+              hr: () => <hr className="border-gray-200 my-8" />,
+              code: ({children}) => <code className="bg-gray-100 px-2 py-1 rounded text-sm font-mono">{children}</code>,
+            }}
+          >
+            {post.content}
+          </ReactMarkdown>
         </div>
 
         {/* Back to Blog */}
