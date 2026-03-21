@@ -2,14 +2,13 @@ import { supabase } from '@/lib/supabase'
 import FeaturedPageClient from './FeaturedPageClient'
 
 export const metadata = {
-  title: 'Featured Businesses - AntiguaSearch.com | Premium Listings',
-  description: 'Discover top-rated featured businesses in Antigua & Barbuda. Premium verified listings offering exceptional service.',
+  title: 'Featured Businesses - GrenadaSearch.com | Premium Listings',
+  description: 'Discover top-rated featured businesses in Grenada. Premium verified listings offering exceptional service across the Spice Isle.',
 }
 
-export const revalidate = 300 // Revalidate every 5 minutes
+export const revalidate = 300
 
 export default async function FeaturedPage() {
-  // Fetch all featured listings
   const { data: featuredListings } = await supabase
     .from('listings')
     .select(`
@@ -18,9 +17,7 @@ export default async function FeaturedPage() {
       parish:parishes(name)
     `)
     .eq('status', 'active')
-    .eq('is_featured', true)
-    .gte('featured_until', new Date().toISOString())
-    .order('featured_position', { ascending: true })
+    .eq('featured', true)
     .order('created_at', { ascending: false })
 
   return <FeaturedPageClient featuredListings={featuredListings || []} />
