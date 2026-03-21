@@ -45,3 +45,4 @@ scripts/grenada_listings_seed.csv
 .env.local
 scripts/enrich_descriptions.py
 scripts/enrich_results.log
+scripts/grenada_scraper.py

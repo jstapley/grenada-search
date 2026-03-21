@@ -19,6 +19,7 @@ export async function GET() {
       .select('slug, updated_at')
       .eq('status', 'active')
       .order('updated_at', { ascending: false })
+      .range(0, 4999)
 
     if (listingsError) console.error('Error fetching listings:', listingsError)
 
