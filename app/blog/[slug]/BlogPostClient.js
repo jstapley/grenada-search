@@ -26,6 +26,7 @@ export default function BlogPostClient({ post }) {
               <Link href="/categories" className="text-gray-700 hover:text-[#007A5E] font-medium">Categories</Link>
               <Link href="/blog" className="text-[#007A5E] font-semibold">Blog</Link>
               <Link href="/about" className="text-gray-700 hover:text-[#007A5E] font-medium">About Us</Link>
+              <Link href="/blog" className="text-gray-700 hover:text-[#007A5E] font-medium">Blog</Link>
               <Link href="/contact" className="text-gray-700 hover:text-[#007A5E] font-medium">Contact</Link>
               <Link href="/add-listing" className="bg-[#007A5E] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#005F48] transition">
                 + Add Your Business

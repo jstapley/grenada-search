@@ -268,6 +268,7 @@ export default function AddListingPage() {
               <Link href="/parishes" className="text-gray-700 hover:text-[#007A5E] font-medium">Browse Parishes</Link>
               <Link href="/categories" className="text-gray-700 hover:text-[#007A5E] font-medium">Categories</Link>
               <Link href="/about" className="text-gray-700 hover:text-[#007A5E] font-medium">About Us</Link>
+              <Link href="/blog" className="text-gray-700 hover:text-[#007A5E] font-medium">Blog</Link>
               <Link href="/contact" className="text-gray-700 hover:text-[#007A5E] font-medium">Contact</Link>
             </nav>
 
@@ -286,6 +287,7 @@ export default function AddListingPage() {
               <Link href="/parishes" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Browse Parishes</Link>
               <Link href="/categories" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Categories</Link>
               <Link href="/about" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>About Us</Link>
+              <Link href="/blog" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Blog</Link>
               <Link href="/contact" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
             </nav>
           )}
