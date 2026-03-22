@@ -90,10 +90,8 @@ export default function AdminDashboard() {
   const loadAllData = async () => {
     setLoadingData(true)
 
-    const { data: allListings } = await supabase
-      .from('listings')
-      .select('status')
-      .range(0, 4999)
+    const statsRes = await fetch('/api/admin/listings?type=stats')
+    const { data: allListings } = await statsRes.json()
 
     const { data: allUsers } = await supabase.from('user_profiles').select('id')
     const { data: allCategories } = await supabase.from('categories').select('id')
@@ -119,11 +117,9 @@ export default function AdminDashboard() {
       approvedReviews: approvedReviewsCount
     })
 
-    const { data: listingsData } = await supabase
-      .from('listings')
-      .select(`*, category:categories(name, icon), parish:parishes(name)`)
-      .order('created_at', { ascending: false })
-      .range(0, 4999)
+    const listingsRes = await fetch('/api/admin/listings?type=listings')
+    const { data: listingsData } = await listingsRes.json()
+    setListings(listingsData || [])
 
     setListings(listingsData || [])
 
