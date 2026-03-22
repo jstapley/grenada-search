@@ -13,6 +13,7 @@ export default function DashboardPage() {
   const [claimedListings, setClaimedListings] = useState([])
   const [loadingListings, setLoadingListings] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [upgradingId, setUpgradingId] = useState(null)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -57,6 +58,27 @@ export default function DashboardPage() {
     router.push('/')
   }
 
+  const handleUpgrade = async (listing) => {
+    setUpgradingId(listing.id)
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          listingId: listing.id,
+          listingName: listing.business_name,
+          userEmail: user.email,
+        }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error)
+      window.location.href = data.url
+    } catch (err) {
+      alert('Could not start checkout: ' + err.message)
+      setUpgradingId(null)
+    }
+  }
+
   if (loading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -67,8 +89,6 @@ export default function DashboardPage() {
       </div>
     )
   }
-
-  const hasNonFeaturedListings = claimedListings.some(c => c.listing && !c.listing.featured)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -227,12 +247,13 @@ export default function DashboardPage() {
                         </Link>
                       </div>
                       {!listing.featured && (
-                        <Link
-                          href={`/listing/${listing.slug}`}
-                          className="block w-full text-center bg-[#FCD116] text-[#1a1a1a] px-4 py-2 rounded-lg text-sm font-bold hover:bg-[#e0bc10] transition"
+                        <button
+                          onClick={() => handleUpgrade(listing)}
+                          disabled={upgradingId === listing.id}
+                          className="w-full bg-[#FCD116] text-[#1a1a1a] px-4 py-2 rounded-lg text-sm font-bold hover:bg-[#e0bc10] disabled:bg-gray-300 disabled:cursor-not-allowed transition"
                         >
-                          ⭐ Upgrade to Featured — EC$350/yr
-                        </Link>
+                          {upgradingId === listing.id ? '⏳ Redirecting...' : '⭐ Upgrade to Featured — EC$350/yr'}
+                        </button>
                       )}
                     </div>
                   </div>
