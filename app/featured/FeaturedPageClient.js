@@ -176,7 +176,7 @@ export default function FeaturedPageClient({ featuredListings }) {
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-8 md:py-12 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <Image src="/grenada-flag.png" alt="Grenada Flag" width={40} height={40} className="rounded-full" />
@@ -202,6 +202,15 @@ export default function FeaturedPageClient({ featuredListings }) {
                 <Link href="/add-listing" className="block text-gray-400 hover:text-white transition">List Your Business</Link>
                 <Link href="/advertise" className="block text-gray-400 hover:text-white transition">Advertise With Us</Link>
                 <Link href="/pricing" className="block text-gray-400 hover:text-white transition">Pricing</Link>
+              </div>
+            </div>
+            <div>
+              <h6 className="font-bold mb-4 text-base md:text-lg">Websites</h6>
+              <div className="space-y-2 text-sm">
+                <a href="https://www.grenadasearch.com" className="block text-gray-400 hover:text-white transition">GrenadaSearch.com</a>
+                <a href="https://www.antiguasearch.com" className="block text-gray-400 hover:text-white transition">AntiguaSearch.com</a>
+                <a href="https://www.stapleyinc.com" target="_blank" rel="noopener noreferrer" className="block text-gray-400 hover:text-white transition">StapleyInc.com</a>
+                <a href="https://www.antiguamarinesolutions.com" target="_blank" rel="noopener noreferrer" className="block text-gray-400 hover:text-white transition">AntiguaMarineSolutions.com</a>
               </div>
             </div>
             <div>
