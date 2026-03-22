@@ -87,7 +87,9 @@ export default function ClaimListingPage() {
       .insert([{
         user_id: user.id,
         listing_id: listingId,
-        status: 'pending'
+        status: 'pending',
+        claimant_name: user.user_metadata?.full_name || user.email,
+        claimant_email: user.email,
       }])
 
     if (error) {
