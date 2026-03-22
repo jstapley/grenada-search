@@ -18,7 +18,6 @@ export default function ClaimListingPage() {
   const [categories, setCategories] = useState([])
   const [claiming, setClaiming] = useState(null)
   
-  // Modal state
   const [modal, setModal] = useState({
     isOpen: false,
     title: '',
@@ -40,14 +39,12 @@ export default function ClaimListingPage() {
   }, [user])
 
   const loadData = async () => {
-    // Load categories
     const { data: cats } = await supabase
       .from('categories')
       .select('*')
       .order('name')
     setCategories(cats || [])
 
-    // Load unclaimed listings
     const { data: allListings } = await supabase
       .from('listings')
       .select(`
@@ -58,7 +55,6 @@ export default function ClaimListingPage() {
       .eq('status', 'active')
       .order('business_name')
 
-    // Filter out already claimed listings
     const { data: claimedIds } = await supabase
       .from('claimed_listings')
       .select('listing_id')
@@ -91,7 +87,7 @@ export default function ClaimListingPage() {
       .insert([{
         user_id: user.id,
         listing_id: listingId,
-        verified: false
+        status: 'pending'
       }])
 
     if (error) {
@@ -131,37 +127,31 @@ export default function ClaimListingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Modal */}
       <Modal {...modal} />
 
-      {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <Link href="/dashboard" className="flex items-center gap-3">
               <Image 
                 src="/grenada-flag.png" 
-                alt="Antigua Flag" 
+                alt="Grenada Flag" 
                 width={50} 
                 height={50}
                 className="rounded-full"
               />
               <div>
-                <div className="text-xl font-bold text-gray-900">ANTIGUA & BARBUDA</div>
-                <div className="text-sm text-indigo-600 font-semibold">ANTIGUA SEARCH</div>
+                <div className="text-xl font-bold text-gray-900">GRENADA</div>
+                <div className="text-sm text-[#007A5E] font-semibold">GRENADA SEARCH</div>
               </div>
             </Link>
-            <Link
-              href="/dashboard"
-              className="text-gray-700 hover:text-indigo-600 font-medium"
-            >
+            <Link href="/dashboard" className="text-gray-700 hover:text-[#007A5E] font-medium">
               ← Back to Dashboard
             </Link>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
           <h1 className="text-4xl font-extrabold text-gray-900 mb-2">
@@ -172,7 +162,6 @@ export default function ClaimListingPage() {
           </p>
         </div>
 
-        {/* Search & Filter */}
         <div className="bg-white rounded-xl p-6 mb-8 border-2 border-gray-200">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -183,8 +172,8 @@ export default function ClaimListingPage() {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="e.g., Paradise Resort, Dickenson Bay..."
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-indigo-600 focus:outline-none"
+                placeholder="e.g., Spice Island Beach Resort..."
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#007A5E] focus:outline-none"
               />
             </div>
             <div>
@@ -194,7 +183,7 @@ export default function ClaimListingPage() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-indigo-600 focus:outline-none"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-[#007A5E] focus:outline-none"
               >
                 <option value="">All Categories</option>
                 {categories.map(cat => (
@@ -207,7 +196,6 @@ export default function ClaimListingPage() {
           </div>
         </div>
 
-        {/* Listings Grid */}
         {loadingListings ? (
           <div className="text-center py-12">
             <p className="text-gray-600">Loading listings...</p>
@@ -223,7 +211,7 @@ export default function ClaimListingPage() {
             </p>
             <Link
               href="/add-listing"
-              className="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition"
+              className="inline-block bg-[#007A5E] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#005F48] transition"
             >
               Add Your Business Instead
             </Link>
@@ -239,7 +227,7 @@ export default function ClaimListingPage() {
                   key={listing.id}
                   className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition"
                 >
-                  <div className="relative aspect-video bg-gradient-to-br from-indigo-100 to-blue-100">
+                  <div className="relative aspect-video bg-[#E8F5F1]">
                     {listing.image_url ? (
                       <Image
                         src={listing.image_url}
@@ -258,7 +246,7 @@ export default function ClaimListingPage() {
                       {listing.business_name}
                     </h3>
                     {listing.category && (
-                      <div className="text-sm text-indigo-600 font-semibold mb-2">
+                      <div className="text-sm text-[#007A5E] font-semibold mb-2">
                         {listing.category.icon} {listing.category.name}
                       </div>
                     )}
@@ -283,7 +271,7 @@ export default function ClaimListingPage() {
                       <button
                         onClick={() => handleClaim(listing.id)}
                         disabled={claiming === listing.id}
-                        className="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-700 transition disabled:opacity-50"
+                        className="flex-1 bg-[#007A5E] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#005F48] transition disabled:opacity-50"
                       >
                         {claiming === listing.id ? 'Claiming...' : 'Claim This'}
                       </button>
@@ -295,8 +283,7 @@ export default function ClaimListingPage() {
           </>
         )}
 
-        {/* Can't Find Business */}
-        <div className="mt-12 bg-blue-50 border-l-4 border-indigo-600 p-6 rounded-r-xl">
+        <div className="mt-12 bg-[#E8F5F1] border-l-4 border-[#007A5E] p-6 rounded-r-xl">
           <h3 className="text-lg font-bold text-gray-900 mb-2">
             Can't find your business?
           </h3>
@@ -305,7 +292,7 @@ export default function ClaimListingPage() {
           </p>
           <Link
             href="/add-listing"
-            className="inline-block bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition"
+            className="inline-block bg-[#007A5E] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#005F48] transition"
           >
             Add Your Business →
           </Link>
