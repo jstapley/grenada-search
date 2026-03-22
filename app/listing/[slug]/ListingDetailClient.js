@@ -9,9 +9,11 @@ import ReviewList from '@/components/reviews/ReviewList'
 import ReviewForm from '@/components/reviews/ReviewForm'
 import ListingPageClient from '@/components/ListingPageClient'
 import UpgradeToFeatured from '@/components/UpgradeToFeatured'
+import { useAuth } from '@/lib/AuthContext'
 
 export default function ListingDetailClient({ listing, isClaimed, relatedListings }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { user } = useAuth()
 
   return (
     <div className="min-h-screen bg-white">
@@ -56,7 +58,11 @@ export default function ListingDetailClient({ listing, isClaimed, relatedListing
               <Link href="/about" className="text-gray-700 hover:text-[#007A5E] font-medium">About Us</Link>
               <Link href="/blog" className="text-gray-700 hover:text-[#007A5E] font-medium">Blog</Link>
               <Link href="/contact" className="text-gray-700 hover:text-[#007A5E] font-medium">Contact</Link>
-              <Link href="/login" className="text-gray-700 hover:text-[#007A5E] font-medium">Login</Link>
+              {user ? (
+                <Link href="/dashboard" className="text-gray-700 hover:text-[#007A5E] font-medium">Dashboard</Link>
+              ) : (
+                <Link href="/login" className="text-gray-700 hover:text-[#007A5E] font-medium">Login</Link>
+              )}
               <Link href="/add-listing" className="bg-[#007A5E] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#005F48] transition">
                 + Add Your Business
               </Link>
@@ -79,7 +85,11 @@ export default function ListingDetailClient({ listing, isClaimed, relatedListing
               <Link href="/about" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>About Us</Link>
               <Link href="/blog" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Blog</Link>
               <Link href="/contact" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
-              <Link href="/login" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+              {user ? (
+                <Link href="/dashboard" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+              ) : (
+                <Link href="/login" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+              )}
               <Link href="/add-listing" className="block bg-[#007A5E] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#005F48] transition text-center" onClick={() => setMobileMenuOpen(false)}>
                 + Add Your Business
               </Link>
