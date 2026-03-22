@@ -42,7 +42,7 @@ export default function DashboardPage() {
       .select(`
         *,
         listing:listings(
-          id, business_name, slug, short_description, address, status,
+          id, business_name, slug, short_description, address, status, featured,
           category:categories(name, icon),
           parish:parishes(name)
         )
@@ -68,9 +68,10 @@ export default function DashboardPage() {
     )
   }
 
+  const hasNonFeaturedListings = claimedListings.some(c => c.listing && !c.listing.featured)
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="bg-white border-b border-[#007A5E] sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
@@ -98,7 +99,6 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
           <h1 className="text-4xl font-extrabold text-gray-900 mb-2">Welcome back! 👋</h1>
@@ -147,11 +147,14 @@ export default function DashboardPage() {
             </>
           )}
 
-          <div className="bg-[#007A5E] rounded-xl p-6 text-white">
+          <Link
+            href="/pricing"
+            className="bg-[#007A5E] rounded-xl p-6 text-white hover:bg-[#005F48] transition"
+          >
             <div className="text-4xl mb-3">⭐</div>
             <h3 className="text-xl font-bold mb-2">Go Featured</h3>
             <p className="text-white/90">Get premium placement and more visibility</p>
-          </div>
+          </Link>
         </div>
 
         {/* My Listings */}
@@ -180,41 +183,57 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {claimedListings.map((claim) => {
                 if (!claim.listing) return null
+                const listing = claim.listing
                 return (
-                  <div key={claim.id} className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition">
-                    <div className="aspect-video bg-[#E8F5F1] flex items-center justify-center">
-                      <span className="text-6xl">{claim.listing.category?.icon || '🏢'}</span>
+                  <div key={claim.id} className={`bg-white border-2 rounded-xl overflow-hidden hover:shadow-lg transition ${
+                    listing.featured ? 'border-[#FCD116]' : 'border-gray-200'
+                  }`}>
+                    <div className="relative aspect-video bg-[#E8F5F1] flex items-center justify-center">
+                      <span className="text-6xl">{listing.category?.icon || '🏢'}</span>
+                      {listing.featured && (
+                        <div className="absolute top-2 right-2 bg-[#FCD116] text-[#1a1a1a] px-2 py-1 rounded-full text-xs font-bold">
+                          ⭐ Featured
+                        </div>
+                      )}
                     </div>
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-2">
                         <h3 className="text-xl font-bold text-gray-900">
-                          {claim.listing.business_name || 'Unnamed Business'}
+                          {listing.business_name || 'Unnamed Business'}
                         </h3>
                         <span className={`text-xs px-2 py-1 rounded-full ${
-                          claim.listing.status === 'active'
+                          listing.status === 'active'
                             ? 'bg-green-100 text-green-700'
                             : 'bg-[#FEF9E0] text-[#c9a800]'
                         }`}>
-                          {claim.listing.status || 'unknown'}
+                          {listing.status || 'unknown'}
                         </span>
                       </div>
-                      {claim.listing.parish && (
-                        <p className="text-sm text-gray-600 mb-3">📍 {claim.listing.parish.name}</p>
+                      {listing.parish && (
+                        <p className="text-sm text-gray-600 mb-3">📍 {listing.parish.name}</p>
                       )}
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 mb-3">
                         <Link
-                          href={`/listing/${claim.listing.slug}`}
+                          href={`/listing/${listing.slug}`}
                           className="flex-1 text-center bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition"
                         >
                           View
                         </Link>
                         <Link
-                          href={`/dashboard/edit/${claim.listing.id}`}
+                          href={`/dashboard/edit/${listing.id}`}
                           className="flex-1 text-center bg-[#007A5E] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#005F48] transition"
                         >
                           Edit
                         </Link>
                       </div>
+                      {!listing.featured && (
+                        <Link
+                          href={`/listing/${listing.slug}`}
+                          className="block w-full text-center bg-[#FCD116] text-[#1a1a1a] px-4 py-2 rounded-lg text-sm font-bold hover:bg-[#e0bc10] transition"
+                        >
+                          ⭐ Upgrade to Featured — EC$350/yr
+                        </Link>
+                      )}
                     </div>
                   </div>
                 )
