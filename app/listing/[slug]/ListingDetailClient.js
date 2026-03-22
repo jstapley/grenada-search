@@ -8,6 +8,7 @@ import ReviewStats from '@/components/reviews/ReviewStats'
 import ReviewList from '@/components/reviews/ReviewList'
 import ReviewForm from '@/components/reviews/ReviewForm'
 import ListingPageClient from '@/components/ListingPageClient'
+import UpgradeToFeatured from '@/components/UpgradeToFeatured'
 
 export default function ListingDetailClient({ listing, isClaimed, relatedListings }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -120,6 +121,7 @@ export default function ListingDetailClient({ listing, isClaimed, relatedListing
                 </Link>
               </div>
             )}
+            <UpgradeToFeatured listing={listing} />
           </div>
         </div>
 
@@ -235,6 +237,7 @@ export default function ListingDetailClient({ listing, isClaimed, relatedListing
                   </Link>
                 </div>
               )}
+              <UpgradeToFeatured listing={listing} />
             </div>
           </div>
         </div>
