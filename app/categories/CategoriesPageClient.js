@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useAuth } from '@/lib/AuthContext'
 
 export default function CategoriesPageClient({ categories }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { user } = useAuth()
 
   return (
     <div className="min-h-screen bg-white">
@@ -50,6 +52,11 @@ export default function CategoriesPageClient({ categories }) {
               <Link href="/about" className="text-gray-700 hover:text-[#007A5E] font-medium">About Us</Link>
               <Link href="/blog" className="text-gray-700 hover:text-[#007A5E] font-medium">Blog</Link>
               <Link href="/contact" className="text-gray-700 hover:text-[#007A5E] font-medium">Contact</Link>
+              {user ? (
+                <Link href="/dashboard" className="text-gray-700 hover:text-[#007A5E] font-medium">Dashboard</Link>
+              ) : (
+                <Link href="/login" className="text-gray-700 hover:text-[#007A5E] font-medium">Login</Link>
+              )}
               <Link href="/add-listing" className="bg-[#007A5E] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#005F48] transition">
                 + Add Your Business
               </Link>
@@ -72,6 +79,11 @@ export default function CategoriesPageClient({ categories }) {
               <Link href="/about" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>About Us</Link>
               <Link href="/blog" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Blog</Link>
               <Link href="/contact" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
+              {user ? (
+                <Link href="/dashboard" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+              ) : (
+                <Link href="/login" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+              )}
               <Link href="/add-listing" className="block bg-[#007A5E] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#005F48] transition text-center" onClick={() => setMobileMenuOpen(false)}>
                 + Add Your Business
               </Link>
@@ -98,7 +110,7 @@ export default function CategoriesPageClient({ categories }) {
             Browse All Categories
           </h1>
           <p className="text-base md:text-xl text-white/90 max-w-3xl mx-auto px-4">
-            From fine dining to adventure tours, discover the best businesses and attractions 
+            From fine dining to adventure tours, discover the best businesses and attractions
             across Grenada organized by category.
           </p>
         </div>
@@ -117,6 +129,11 @@ export default function CategoriesPageClient({ categories }) {
               <h2 className="font-bold text-base md:text-xl text-gray-900 mb-2 group-hover:text-[#007A5E] transition">
                 {category.name}
               </h2>
+              {category.listing_count > 0 && (
+                <div className="text-[#007A5E] font-semibold text-xs md:text-sm mb-1">
+                  {category.listing_count} listings
+                </div>
+              )}
               <div className="text-[#007A5E] font-bold text-xs md:text-sm group-hover:translate-y-1 transition-transform">
                 Explore ↓
               </div>
@@ -133,12 +150,12 @@ export default function CategoriesPageClient({ categories }) {
           </h2>
           <div className="text-gray-600 space-y-4 text-base md:text-lg">
             <p>
-              Whether you&apos;re looking for a romantic beachfront restaurant, an adventure tour, 
+              Whether you&apos;re looking for a romantic beachfront restaurant, an adventure tour,
               or a luxury resort, our category directory makes it easy to find exactly what you need.
             </p>
             <p>
-              Browse through our carefully organized categories to discover the best that Grenada 
-              has to offer. Each category features verified businesses with detailed information, photos, 
+              Browse through our carefully organized categories to discover the best that Grenada
+              has to offer. Each category features verified businesses with detailed information, photos,
               and contact details to help you plan your perfect island experience.
             </p>
           </div>
@@ -210,7 +227,7 @@ export default function CategoriesPageClient({ categories }) {
             </div>
           </div>
           <div className="border-t border-gray-800 pt-6 md:pt-8 text-center">
-            <p className="text-gray-400 text-sm">© 2026 Grenada Search. All rights reserved.</p>
+            <p className="text-gray-400 text-sm">© 2026 GrenadaSearch.com. All rights reserved.</p>
           </div>
         </div>
       </footer>

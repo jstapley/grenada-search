@@ -3,9 +3,13 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/lib/AuthContext'
 
-export default function CategoryPageClient({ category, listings, parishes }) {
+export default function CategoryPageClient({ category, listings, parishes, page, totalPages, total }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { user } = useAuth()
+  const router = useRouter()
 
   return (
     <div className="min-h-screen bg-white">
@@ -50,7 +54,11 @@ export default function CategoryPageClient({ category, listings, parishes }) {
               <Link href="/about" className="text-gray-700 hover:text-[#007A5E] font-medium">About Us</Link>
               <Link href="/blog" className="text-gray-700 hover:text-[#007A5E] font-medium">Blog</Link>
               <Link href="/contact" className="text-gray-700 hover:text-[#007A5E] font-medium">Contact</Link>
-              <Link href="/login" className="text-gray-700 hover:text-[#007A5E] font-medium">Login</Link>
+              {user ? (
+                <Link href="/dashboard" className="text-gray-700 hover:text-[#007A5E] font-medium">Dashboard</Link>
+              ) : (
+                <Link href="/login" className="text-gray-700 hover:text-[#007A5E] font-medium">Login</Link>
+              )}
               <Link href="/add-listing" className="bg-[#007A5E] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#005F48] transition">
                 + Add Your Business
               </Link>
@@ -73,7 +81,11 @@ export default function CategoryPageClient({ category, listings, parishes }) {
               <Link href="/about" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>About Us</Link>
               <Link href="/blog" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Blog</Link>
               <Link href="/contact" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
-              <Link href="/login" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+              {user ? (
+                <Link href="/dashboard" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+              ) : (
+                <Link href="/login" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+              )}
               <Link href="/add-listing" className="block bg-[#007A5E] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#005F48] transition text-center" onClick={() => setMobileMenuOpen(false)}>
                 + Add Your Business
               </Link>
@@ -107,7 +119,7 @@ export default function CategoryPageClient({ category, listings, parishes }) {
           )}
           <div className="flex items-center gap-4 md:gap-6 flex-wrap">
             <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 md:px-6 py-2 md:py-3 border border-white/20">
-              <span className="text-2xl md:text-3xl font-bold text-[#FCD116]">{listings.length}</span>
+              <span className="text-2xl md:text-3xl font-bold text-[#FCD116]">{total}</span>
               <span className="text-white ml-2 text-sm md:text-base">Businesses</span>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 md:px-6 py-2 md:py-3 border border-white/20">
@@ -152,15 +164,25 @@ export default function CategoryPageClient({ category, listings, parishes }) {
           </div>
         ) : (
           <>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 md:mb-8">
-              {category.name} in Grenada
-            </h2>
+            <div className="flex items-center justify-between mb-6 md:mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                {category.name} in Grenada
+              </h2>
+              {totalPages > 1 && (
+                <p className="text-sm text-gray-500">
+                  Page {page} of {totalPages}
+                </p>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {listings.map((listing) => (
                 <Link
                   key={listing.id}
                   href={`/listing/${listing.slug}`}
-                  className="border-2 border-gray-200 rounded-xl overflow-hidden hover:shadow-2xl hover:border-[#007A5E] transition-all duration-300 group bg-white"
+                  className={`border-2 rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300 group bg-white ${
+                    listing.featured ? 'border-[#FCD116]' : 'border-gray-200 hover:border-[#007A5E]'
+                  }`}
                 >
                   {listing.image_url ? (
                     <div className="aspect-video relative bg-gray-100">
@@ -208,6 +230,47 @@ export default function CategoryPageClient({ category, listings, parishes }) {
                 </Link>
               ))}
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-10">
+                <Link
+                  href={`/category/${category.slug}?page=${page - 1}`}
+                  className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
+                    page <= 1
+                      ? 'bg-gray-100 text-gray-400 pointer-events-none'
+                      : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-[#007A5E] hover:text-[#007A5E]'
+                  }`}
+                >
+                  ← Previous
+                </Link>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                  <Link
+                    key={p}
+                    href={`/category/${category.slug}?page=${p}`}
+                    className={`w-10 h-10 flex items-center justify-center rounded-lg font-semibold text-sm transition ${
+                      p === page
+                        ? 'bg-[#007A5E] text-white'
+                        : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-[#007A5E] hover:text-[#007A5E]'
+                    }`}
+                  >
+                    {p}
+                  </Link>
+                ))}
+
+                <Link
+                  href={`/category/${category.slug}?page=${page + 1}`}
+                  className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
+                    page >= totalPages
+                      ? 'bg-gray-100 text-gray-400 pointer-events-none'
+                      : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-[#007A5E] hover:text-[#007A5E]'
+                  }`}
+                >
+                  Next →
+                </Link>
+              </div>
+            )}
           </>
         )}
       </section>
@@ -274,7 +337,7 @@ export default function CategoryPageClient({ category, listings, parishes }) {
             </div>
           </div>
           <div className="border-t border-gray-800 pt-6 md:pt-8 text-center">
-            <p className="text-gray-400 text-sm">© 2026 Grenada Search. All rights reserved.</p>
+            <p className="text-gray-400 text-sm">© 2026 GrenadaSearch.com. All rights reserved.</p>
           </div>
         </div>
       </footer>

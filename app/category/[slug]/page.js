@@ -52,15 +52,22 @@ async function getCategory(slug) {
   return category
 }
 
-async function getListings(categoryId) {
-  const { data: listings } = await supabase
+const PAGE_SIZE = 24
+
+async function getListings(categoryId, page = 1) {
+  const from = (page - 1) * PAGE_SIZE
+  const to = from + PAGE_SIZE - 1
+
+  const { data: listings, count } = await supabase
     .from('listings')
-    .select(`*, parish:parishes(name, slug)`)
+    .select(`*, parish:parishes(name, slug)`, { count: 'exact' })
     .eq('category_id', categoryId)
     .eq('status', 'active')
     .order('featured', { ascending: false })
     .order('created_at', { ascending: false })
-  return listings || []
+    .range(from, to)
+
+  return { listings: listings || [], total: count || 0 }
 }
 
 async function getParishes(categoryId) {
@@ -69,7 +76,7 @@ async function getParishes(categoryId) {
     .select('parish:parishes(id, name, slug)')
     .eq('category_id', categoryId)
     .eq('status', 'active')
-  
+
   const uniqueParishes = {}
   parishes?.forEach(item => {
     if (item.parish) uniqueParishes[item.parish.id] = item.parish
@@ -77,13 +84,26 @@ async function getParishes(categoryId) {
   return Object.values(uniqueParishes)
 }
 
-export default async function CategoryPage({ params }) {
+export default async function CategoryPage({ params, searchParams }) {
   const resolvedParams = await params
+  const resolvedSearch = await searchParams
+  const page = parseInt(resolvedSearch?.page || '1', 10)
+
   const category = await getCategory(resolvedParams.slug)
   if (!category) notFound()
-  
-  const listings = await getListings(category.id)
-  const parishes = await getParishes(category.id)
 
-  return <CategoryPageClient category={category} listings={listings} parishes={parishes} />
+  const { listings, total } = await getListings(category.id, page)
+  const parishes = await getParishes(category.id)
+  const totalPages = Math.ceil(total / PAGE_SIZE)
+
+  return (
+    <CategoryPageClient
+      category={category}
+      listings={listings}
+      parishes={parishes}
+      page={page}
+      totalPages={totalPages}
+      total={total}
+    />
+  )
 }

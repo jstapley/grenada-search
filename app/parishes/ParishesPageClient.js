@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useAuth } from '@/lib/AuthContext'
 
 export default function ParishesPageClient({ parishes }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { user } = useAuth()
 
   return (
     <div className="min-h-screen bg-white">
@@ -50,6 +52,11 @@ export default function ParishesPageClient({ parishes }) {
               <Link href="/about" className="text-gray-700 hover:text-[#007A5E] font-medium">About Us</Link>
               <Link href="/blog" className="text-gray-700 hover:text-[#007A5E] font-medium">Blog</Link>
               <Link href="/contact" className="text-gray-700 hover:text-[#007A5E] font-medium">Contact</Link>
+              {user ? (
+                <Link href="/dashboard" className="text-gray-700 hover:text-[#007A5E] font-medium">Dashboard</Link>
+              ) : (
+                <Link href="/login" className="text-gray-700 hover:text-[#007A5E] font-medium">Login</Link>
+              )}
               <Link href="/add-listing" className="bg-[#007A5E] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#005F48] transition">
                 + Add Your Business
               </Link>
@@ -72,6 +79,11 @@ export default function ParishesPageClient({ parishes }) {
               <Link href="/about" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>About Us</Link>
               <Link href="/blog" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Blog</Link>
               <Link href="/contact" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
+              {user ? (
+                <Link href="/dashboard" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+              ) : (
+                <Link href="/login" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+              )}
               <Link href="/add-listing" className="block bg-[#007A5E] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#005F48] transition text-center" onClick={() => setMobileMenuOpen(false)}>
                 + Add Your Business
               </Link>
@@ -98,7 +110,7 @@ export default function ParishesPageClient({ parishes }) {
             Browse All Parishes
           </h1>
           <p className="text-base md:text-xl text-white/90 max-w-3xl mx-auto px-4">
-            Explore businesses and attractions across all parishes of Grenada. 
+            Explore businesses and attractions across all parishes of Grenada.
             From the capital city to coastal communities, discover what makes each parish unique.
           </p>
         </div>
@@ -119,9 +131,11 @@ export default function ParishesPageClient({ parishes }) {
                 </h2>
                 <span className="text-3xl md:text-4xl">📍</span>
               </div>
-              <p className="text-gray-600 mb-4 md:mb-6 leading-relaxed text-base md:text-lg">
-                {parish.description}
-              </p>
+              {parish.description && (
+                <p className="text-gray-600 mb-4 md:mb-6 leading-relaxed text-base md:text-lg">
+                  {parish.description}
+                </p>
+              )}
               <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                 <div className="text-[#007A5E] font-bold text-lg md:text-xl">
                   {parish.listing_count} listings
@@ -143,14 +157,14 @@ export default function ParishesPageClient({ parishes }) {
           </h2>
           <div className="text-gray-600 space-y-4 text-base md:text-lg">
             <p>
-              Grenada is divided into six parishes on the main island, plus Carriacou &amp; Petite Martinique, 
-              each with its own unique character and attractions. From the bustling capital of St. George&apos;s 
-              to the rugged beauty and historic estates of St. Patrick, every parish offers something special 
+              Grenada is divided into six parishes on the main island, plus Carriacou &amp; Petite Martinique,
+              each with its own unique character and attractions. From the bustling capital of St. George&apos;s
+              to the rugged beauty and historic estates of St. Patrick, every parish offers something special
               for visitors and residents alike.
             </p>
             <p>
-              Browse our comprehensive directory to find restaurants, hotels, tours, activities, and 
-              local businesses in each parish. Whether you&apos;re planning a vacation or looking for local 
+              Browse our comprehensive directory to find restaurants, hotels, tours, activities, and
+              local businesses in each parish. Whether you&apos;re planning a vacation or looking for local
               services, our parish-by-parish guide makes it easy to discover the best of Grenada.
             </p>
           </div>
@@ -222,7 +236,7 @@ export default function ParishesPageClient({ parishes }) {
             </div>
           </div>
           <div className="border-t border-gray-800 pt-6 md:pt-8 text-center">
-            <p className="text-gray-400 text-sm">© 2026 Grenada Search. All rights reserved.</p>
+            <p className="text-gray-400 text-sm">© 2026 GrenadaSearch.com. All rights reserved.</p>
           </div>
         </div>
       </footer>

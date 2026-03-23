@@ -12,7 +12,7 @@ export const metadata = {
   openGraph: {
     title: 'Browse All Categories | GrenadaSearch.com',
     description: 'Explore all business categories in Grenada - restaurants, hotels, tours, activities, shopping, and more.',
-    url: 'https://www.GrenadaSearch.com/categories',
+    url: 'https://www.grenadasearch.com/categories',
     siteName: 'GrenadaSearch.com',
     locale: 'en_US',
     type: 'website',
@@ -29,7 +29,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: 'Browse All Categories | GrenadaSearch.com',
     description: 'Explore all business categories in Grenada.',
-    images: ['https://www.GrenadaSearch.com.com/og-image.jpg'],
+    images: ['https://www.grenadasearch.com/og-image.jpg'],
   },
 }
 
@@ -38,8 +38,21 @@ async function getCategories() {
     .from('categories')
     .select('*')
     .order('name', { ascending: true })
-  
-  return categories || []
+
+  if (!categories) return []
+
+  const categoriesWithCounts = await Promise.all(
+    categories.map(async (category) => {
+      const { count } = await supabase
+        .from('listings')
+        .select('*', { count: 'exact', head: true })
+        .eq('category_id', category.id)
+        .eq('status', 'active')
+      return { ...category, listing_count: count || 0 }
+    })
+  )
+
+  return categoriesWithCounts
 }
 
 export default async function CategoriesPage() {

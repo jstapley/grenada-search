@@ -16,8 +16,22 @@ async function getParishes() {
     .from('parishes')
     .select('*')
     .order('name', { ascending: true })
-  
-  return parishes || []
+
+  if (!parishes) return []
+
+  // Fetch listing counts for each parish
+  const parishesWithCounts = await Promise.all(
+    parishes.map(async (parish) => {
+      const { count } = await supabase
+        .from('listings')
+        .select('*', { count: 'exact', head: true })
+        .eq('parish_id', parish.id)
+        .eq('status', 'active')
+      return { ...parish, listing_count: count || 0 }
+    })
+  )
+
+  return parishesWithCounts
 }
 
 export default async function ParishesPage() {
