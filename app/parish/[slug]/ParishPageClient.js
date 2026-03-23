@@ -1,11 +1,18 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 
-export default function ParishPageClient({ parish, listings, categories }) {
+export default function ParishPageClient({ parish, listings, categories, totalCount, totalPages, currentPage }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const router = useRouter()
+
+  const handlePageChange = (page) => {
+    router.push(`/parish/${parish.slug}?page=${page}`)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -105,7 +112,7 @@ export default function ParishPageClient({ parish, listings, categories }) {
           <p className="text-base md:text-xl text-white/90 mb-6 max-w-3xl">{parish.description}</p>
           <div className="flex items-center gap-4 md:gap-6 flex-wrap">
             <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 md:px-6 py-2 md:py-3 border border-white/20">
-              <span className="text-2xl md:text-3xl font-bold text-[#FCD116]">{listings.length}</span>
+              <span className="text-2xl md:text-3xl font-bold text-[#FCD116]">{totalCount}</span>
               <span className="text-white ml-2 text-sm md:text-base">Businesses</span>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 md:px-6 py-2 md:py-3 border border-white/20">
@@ -150,9 +157,15 @@ export default function ParishPageClient({ parish, listings, categories }) {
           </div>
         ) : (
           <>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6 md:mb-8">
-              Businesses in {parish.name}
-            </h2>
+            <div className="flex items-center justify-between mb-6 md:mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                Businesses in {parish.name}
+              </h2>
+              <p className="text-gray-500 text-sm">
+                Showing {((currentPage - 1) * 24) + 1}–{Math.min(currentPage * 24, totalCount)} of {totalCount}
+              </p>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {listings.map((listing) => (
                 <Link
@@ -211,6 +224,52 @@ export default function ParishPageClient({ parish, listings, categories }) {
                 </Link>
               ))}
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-10 md:mt-12 flex items-center justify-center gap-2 flex-wrap">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-700 font-semibold hover:border-[#007A5E] hover:text-[#007A5E] disabled:opacity-40 disabled:cursor-not-allowed transition"
+                >
+                  ← Previous
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(page => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 2)
+                  .reduce((acc, page, idx, arr) => {
+                    if (idx > 0 && page - arr[idx - 1] > 1) acc.push('...')
+                    acc.push(page)
+                    return acc
+                  }, [])
+                  .map((item, idx) =>
+                    item === '...' ? (
+                      <span key={`ellipsis-${idx}`} className="px-2 text-gray-400">...</span>
+                    ) : (
+                      <button
+                        key={item}
+                        onClick={() => handlePageChange(item)}
+                        className={`w-10 h-10 rounded-lg font-semibold transition ${
+                          currentPage === item
+                            ? 'bg-[#007A5E] text-white'
+                            : 'border-2 border-gray-200 text-gray-700 hover:border-[#007A5E] hover:text-[#007A5E]'
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    )
+                  )}
+
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-700 font-semibold hover:border-[#007A5E] hover:text-[#007A5E] disabled:opacity-40 disabled:cursor-not-allowed transition"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
           </>
         )}
       </section>

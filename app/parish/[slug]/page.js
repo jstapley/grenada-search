@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation'
 import ParishPageClient from './ParishPageClient'
 
 export const revalidate = 3600
+export const dynamicParams = true
+
+const LISTINGS_PER_PAGE = 24
 
 export async function generateStaticParams() {
   const { data: parishes } = await supabase
@@ -52,15 +55,25 @@ async function getParish(slug) {
   return parish
 }
 
-async function getListings(parishId) {
-  const { data: listings } = await supabase
+async function getListings(parishId, page = 1) {
+  const from = (page - 1) * LISTINGS_PER_PAGE
+  const to = from + LISTINGS_PER_PAGE - 1
+
+  const { data: listings, count } = await supabase
     .from('listings')
-    .select(`*, category:categories(name, icon)`)
+    .select(`*, category:categories(name, icon)`, { count: 'exact' })
     .eq('parish_id', parishId)
     .eq('status', 'active')
     .order('featured', { ascending: false })
     .order('created_at', { ascending: false })
-  return listings || []
+    .range(from, to)
+
+  return {
+    listings: listings || [],
+    totalCount: count || 0,
+    totalPages: Math.ceil((count || 0) / LISTINGS_PER_PAGE),
+    currentPage: page,
+  }
 }
 
 async function getCategories(parishId) {
@@ -69,7 +82,7 @@ async function getCategories(parishId) {
     .select('category:categories(id, name, slug, icon)')
     .eq('parish_id', parishId)
     .eq('status', 'active')
-  
+
   const uniqueCategories = {}
   categories?.forEach(item => {
     if (item.category) uniqueCategories[item.category.id] = item.category
@@ -77,13 +90,24 @@ async function getCategories(parishId) {
   return Object.values(uniqueCategories)
 }
 
-export default async function ParishPage({ params }) {
+export default async function ParishPage({ params, searchParams }) {
   const resolvedParams = await params
+  const resolvedSearchParams = await searchParams
   const parish = await getParish(resolvedParams.slug)
   if (!parish) notFound()
-  
-  const listings = await getListings(parish.id)
+
+  const page = parseInt(resolvedSearchParams?.page || '1', 10)
+  const { listings, totalCount, totalPages, currentPage } = await getListings(parish.id, page)
   const categories = await getCategories(parish.id)
 
-  return <ParishPageClient parish={parish} listings={listings} categories={categories} />
+  return (
+    <ParishPageClient
+      parish={parish}
+      listings={listings}
+      categories={categories}
+      totalCount={totalCount}
+      totalPages={totalPages}
+      currentPage={currentPage}
+    />
+  )
 }
