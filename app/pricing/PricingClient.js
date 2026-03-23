@@ -145,10 +145,7 @@ export default function PricingClient() {
 
             {/* Featured Plan */}
             <div className="relative bg-gradient-to-br from-[#007A5E] to-[#004A38] border-4 border-[#FCD116] rounded-2xl p-8 shadow-lg hover:shadow-2xl transition">
-              <div className="absolute -top-4 right-4 bg-[#CE1126] text-white px-4 py-1.5 rounded-full text-xs font-bold">
-                🔥 First 20 Only
-              </div>
-              <div className="text-center mb-6">
+                <div className="text-center mb-6">
                 <div className="inline-block bg-[#FCD116] text-[#1a1a1a] px-6 py-2 rounded-full font-bold text-sm mb-4">FEATURED LISTING</div>
                 <h2 className="text-3xl font-black text-white mb-3">Premium Placement</h2>
                 <p className="text-3xl text-white font-bold mb-1">EC$350<span className="text-lg">/year</span></p>
