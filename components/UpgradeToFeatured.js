@@ -1,14 +1,75 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { useAuth } from '@/lib/AuthContext'
+import { supabase } from '@/lib/supabase'
 
 export default function UpgradeToFeatured({ listing }) {
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [isOwner, setIsOwner] = useState(false)
+  const [checkingOwnership, setCheckingOwnership] = useState(true)
 
-  if (!user || listing.featured) return null
+  useEffect(() => {
+    if (listing.featured) {
+      setCheckingOwnership(false)
+      return
+    }
+
+    if (!user) {
+      setCheckingOwnership(false)
+      return
+    }
+
+    const checkOwnership = async () => {
+      const { data } = await supabase
+        .from('claimed_listings')
+        .select('id')
+        .eq('listing_id', listing.id)
+        .eq('user_id', user.id)
+        .single()
+      setIsOwner(!!data)
+      setCheckingOwnership(false)
+    }
+
+    checkOwnership()
+  }, [user, listing.id, listing.featured])
+
+  if (listing.featured) return null
+  if (checkingOwnership) return null
+
+  if (!user) {
+    return (
+      <div className="mt-6 bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-300 rounded-xl p-6">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-2xl">⭐</span>
+          <h3 className="text-lg font-bold text-gray-900">Upgrade to Featured</h3>
+        </div>
+        <p className="text-gray-600 text-sm mb-4">
+          Get top placement in your category, a gold border badge, and homepage visibility.
+        </p>
+        <ul className="text-sm text-gray-600 mb-4 space-y-1">
+          <li>✓ Gold border & featured badge</li>
+          <li>✓ Top of category results</li>
+          <li>✓ Homepage featured section</li>
+        </ul>
+        <p className="text-lg font-bold text-gray-900 mb-4">EC$350 / year</p>
+        <Link
+          href={`/login?redirect=/listing/${listing.slug}`}
+          className="block w-full bg-[#FCD116] text-gray-900 py-3 rounded-lg font-bold hover:bg-[#e0bc10] transition text-center"
+        >
+          Log in to Upgrade →
+        </Link>
+        <p className="text-xs text-gray-500 mt-2 text-center">
+          You need to be logged in to upgrade your listing
+        </p>
+      </div>
+    )
+  }
+
+  if (!isOwner) return null
 
   const handleUpgrade = async () => {
     setLoading(true)
