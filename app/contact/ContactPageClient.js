@@ -101,7 +101,7 @@ export default function ContactPageClient({ defaultSubject = '' }) {
                 <div className="bg-[#E8F5F1] p-3 rounded-lg flex-shrink-0"><span className="text-2xl">✉️</span></div>
                 <div>
                   <h3 className="font-bold text-gray-900 mb-1 text-sm md:text-base">Email Us</h3>
-                  <a href="mailto:contact@grenadasearch.com" className="text-[#007A5E] hover:text-[#005F48] text-sm md:text-base break-all">contact@grenadasearch.com</a>
+                  <a href="mailto:jeff@stapleyinc.com" className="text-[#007A5E] hover:text-[#005F48] text-sm md:text-base break-all">jeff@stapleyinc.com</a>
                 </div>
               </div>
               <div className="flex items-start gap-4">
