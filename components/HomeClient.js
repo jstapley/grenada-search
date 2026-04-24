@@ -4,11 +4,13 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useAuth } from '@/lib/AuthContext'
 
 export default function HomeClient({ stats, parishes, categories, featuredListings, monthlyVisitors }) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { user } = useAuth()
 
   const handleSearch = (e) => {
     e.preventDefault()
