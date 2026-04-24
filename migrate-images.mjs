@@ -1,17 +1,4 @@
 import { createClient } from '@supabase/supabase-js'
-import https from 'https'
-import http from 'http'
-import { URL } from 'url'
-
-// ============================================
-// CONFIG — fill these in before running
-// ============================================
-const SUPABASE_URL = 'https://ougvhwgzobkfxsdkbjjn.supabase.co'
-const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJZ3Zod2d6b2JrZnhzZGtiampuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3Mzc2MzgxMiwiZXhwIjoyMDg5MzM5ODEyfQ.zFlTj238eISm9MQmDNqMxdj74hWg9EPVvfoyG8GngwE'
-const GOOGLE_API_KEY = 'AIzaSyDudNa3jiY1AEjfxsD6Jc316_h1EhiWixo'
-const BUCKET_NAME = 'listing-images'
-const BATCH_SIZE = 5
-const BATCH_DELAY_MS = 500
 
 // ============================================
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
