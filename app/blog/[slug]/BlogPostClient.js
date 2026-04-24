@@ -4,9 +4,11 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import ReactMarkdown from 'react-markdown'
+import { useAuth } from '@/lib/AuthContext'
 
 export default function BlogPostClient({ post }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { user } = useAuth()
 
   return (
     <div className="min-h-screen bg-white">
@@ -24,10 +26,14 @@ export default function BlogPostClient({ post }) {
               <Link href="/" className="text-gray-700 hover:text-[#007A5E] font-medium">Home</Link>
               <Link href="/parishes" className="text-gray-700 hover:text-[#007A5E] font-medium">Browse Parishes</Link>
               <Link href="/categories" className="text-gray-700 hover:text-[#007A5E] font-medium">Categories</Link>
-              <Link href="/blog" className="text-[#007A5E] font-semibold">Blog</Link>
               <Link href="/about" className="text-gray-700 hover:text-[#007A5E] font-medium">About Us</Link>
-              <Link href="/blog" className="text-gray-700 hover:text-[#007A5E] font-medium">Blog</Link>
+              <Link href="/blog" className="text-[#007A5E] font-semibold">Blog</Link>
               <Link href="/contact" className="text-gray-700 hover:text-[#007A5E] font-medium">Contact</Link>
+              {user ? (
+                <Link href="/dashboard" className="text-gray-700 hover:text-[#007A5E] font-medium">Dashboard</Link>
+              ) : (
+                <Link href="/login" className="text-gray-700 hover:text-[#007A5E] font-medium">Login</Link>
+              )}
               <Link href="/add-listing" className="bg-[#007A5E] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#005F48] transition">
                 + Add Your Business
               </Link>
@@ -43,7 +49,16 @@ export default function BlogPostClient({ post }) {
           {mobileMenuOpen && (
             <nav className="lg:hidden mt-4 pb-4 border-t border-gray-200 pt-4 space-y-3">
               <Link href="/" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Home</Link>
+              <Link href="/parishes" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Browse Parishes</Link>
+              <Link href="/categories" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Categories</Link>
+              <Link href="/about" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>About Us</Link>
               <Link href="/blog" className="block text-[#007A5E] font-semibold py-2" onClick={() => setMobileMenuOpen(false)}>Blog</Link>
+              <Link href="/contact" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
+              {user ? (
+                <Link href="/dashboard" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+              ) : (
+                <Link href="/login" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+              )}
               <Link href="/add-listing" className="block bg-[#007A5E] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#005F48] transition text-center" onClick={() => setMobileMenuOpen(false)}>+ Add Your Business</Link>
             </nav>
           )}
@@ -51,7 +66,6 @@ export default function BlogPostClient({ post }) {
       </header>
 
       <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        {/* Breadcrumb */}
         <div className="mb-8 text-sm text-gray-500">
           <Link href="/" className="hover:text-[#007A5E]">Home</Link>
           <span className="mx-2">→</span>
@@ -60,7 +74,6 @@ export default function BlogPostClient({ post }) {
           <span className="text-gray-900">{post.title}</span>
         </div>
 
-        {/* Tags */}
         {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
             {post.tags.map(tag => (
@@ -69,26 +82,22 @@ export default function BlogPostClient({ post }) {
           </div>
         )}
 
-        {/* Title */}
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 leading-tight">
           {post.title}
         </h1>
 
-        {/* Meta */}
         <div className="flex items-center gap-4 text-sm text-gray-500 mb-8 pb-8 border-b border-gray-200">
           <span>By {post.author}</span>
           <span>•</span>
           <span>{new Date(post.published_at || post.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
         </div>
 
-        {/* Featured Image */}
         {post.featured_image && (
           <div className="relative h-64 md:h-96 rounded-xl overflow-hidden mb-10">
             <Image src={post.featured_image} alt={post.title} fill className="object-cover" />
           </div>
         )}
 
-        {/* Content */}
         <div className="max-w-none text-gray-700">
           <ReactMarkdown
             components={{
@@ -110,7 +119,6 @@ export default function BlogPostClient({ post }) {
           </ReactMarkdown>
         </div>
 
-        {/* Back to Blog */}
         <div className="mt-12 pt-8 border-t border-gray-200">
           <Link href="/blog" className="inline-flex items-center gap-2 text-[#007A5E] font-semibold hover:text-[#005F48] transition">
             ← Back to Blog
@@ -120,7 +128,51 @@ export default function BlogPostClient({ post }) {
 
       <footer className="bg-gray-900 text-white py-8 md:py-12 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border-t border-gray-800 pt-6 text-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <Image src="/grenada-flag.png" alt="Grenada Flag" width={40} height={40} className="rounded-full" />
+                <div>
+                  <div className="font-bold text-base md:text-lg">Grenada Search</div>
+                  <div className="text-xs md:text-sm text-gray-400">Directory</div>
+                </div>
+              </div>
+              <p className="text-gray-400 text-sm">Your complete guide to experiencing the best of Grenada — the Spice Isle of the Caribbean</p>
+            </div>
+            <div>
+              <h6 className="font-bold mb-4 text-base md:text-lg">Quick Links</h6>
+              <div className="space-y-2 text-sm">
+                <Link href="/" className="block text-gray-400 hover:text-white transition">Home</Link>
+                <Link href="/parishes" className="block text-gray-400 hover:text-white transition">Browse Parishes</Link>
+                <Link href="/categories" className="block text-gray-400 hover:text-white transition">All Categories</Link>
+                <Link href="/blog" className="block text-gray-400 hover:text-white transition">Blog</Link>
+                <Link href="/about" className="block text-gray-400 hover:text-white transition">About Us</Link>
+              </div>
+            </div>
+            <div>
+              <h6 className="font-bold mb-4 text-base md:text-lg">For Business</h6>
+              <div className="space-y-2 text-sm">
+                <Link href="/add-listing" className="block text-gray-400 hover:text-white transition">List Your Business</Link>
+                <Link href="/advertise" className="block text-gray-400 hover:text-white transition">Advertise With Us</Link>
+                <Link href="/pricing" className="block text-gray-400 hover:text-white transition">Pricing</Link>
+              </div>
+            </div>
+            <div>
+              <h6 className="font-bold mb-4 text-base md:text-lg">Websites</h6>
+              <div className="space-y-2 text-sm">
+                <a href="https://www.grenadasearch.com" className="block text-gray-400 hover:text-white transition">GrenadaSearch.com</a>
+                <a href="https://www.antiguasearch.com" className="block text-gray-400 hover:text-white transition">AntiguaSearch.com</a>
+                <a href="https://www.stapleyinc.com" target="_blank" rel="noopener noreferrer" className="block text-gray-400 hover:text-white transition">StapleyInc.com</a>
+                <a href="https://www.antiguamarinesolutions.com" target="_blank" rel="noopener noreferrer" className="block text-gray-400 hover:text-white transition">AntiguaMarineSolutions.com</a>
+              </div>
+            </div>
+            <div>
+              <h6 className="font-bold mb-4 text-base md:text-lg">Contact</h6>
+              <p className="text-gray-400 text-sm mb-2">contact@grenadasearch.com</p>
+              <p className="text-gray-400 text-sm">St. George's, Grenada</p>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 pt-6 md:pt-8 text-center">
             <p className="text-gray-400 text-sm">© 2026 GrenadaSearch.com. All rights reserved.</p>
           </div>
         </div>

@@ -5,11 +5,13 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/lib/AuthContext'
 
 export default function SearchClient() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const query = searchParams.get('q') || ''
+  const { user } = useAuth()
   
   const [searchQuery, setSearchQuery] = useState(query)
   const [results, setResults] = useState([])
@@ -156,6 +158,11 @@ export default function SearchClient() {
               <Link href="/about" className="text-gray-700 hover:text-[#007A5E] font-medium">About Us</Link>
               <Link href="/blog" className="text-gray-700 hover:text-[#007A5E] font-medium">Blog</Link>
               <Link href="/contact" className="text-gray-700 hover:text-[#007A5E] font-medium">Contact</Link>
+              {user ? (
+                <Link href="/dashboard" className="text-gray-700 hover:text-[#007A5E] font-medium">Dashboard</Link>
+              ) : (
+                <Link href="/login" className="text-gray-700 hover:text-[#007A5E] font-medium">Login</Link>
+              )}
               <Link href="/add-listing" className="bg-[#007A5E] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#005F48] transition">
                 + Add Your Business
               </Link>
@@ -176,6 +183,11 @@ export default function SearchClient() {
               <Link href="/about" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>About Us</Link>
               <Link href="/blog" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Blog</Link>
               <Link href="/contact" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Contact</Link>
+              {user ? (
+                <Link href="/dashboard" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+              ) : (
+                <Link href="/login" className="block text-gray-700 hover:text-[#007A5E] font-medium py-2" onClick={() => setMobileMenuOpen(false)}>Login</Link>
+              )}
               <Link href="/add-listing" className="block bg-[#007A5E] text-white px-4 py-3 rounded-lg font-semibold hover:bg-[#005F48] transition text-center" onClick={() => setMobileMenuOpen(false)}>
                 + Add Your Business
               </Link>
@@ -268,7 +280,7 @@ export default function SearchClient() {
               <div className="bg-white rounded-xl border-2 border-gray-200 p-8 md:p-12 text-center">
                 <div className="text-5xl md:text-6xl mb-4">🔍</div>
                 <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Start Your Search</h3>
-                <p className="text-gray-600 mb-8 text-sm md:text-base">Search 200+ businesses across Grenada</p>
+                <p className="text-gray-600 mb-8 text-sm md:text-base">Search 1,000+ businesses across Grenada</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-3xl mx-auto">
                   <Link href="/categories" className="bg-[#F0FAF7] hover:bg-[#E8F5F1] border-2 border-[#B3DDD4] rounded-lg p-6 transition group">
                     <div className="text-3xl mb-2">📋</div>
@@ -385,6 +397,7 @@ export default function SearchClient() {
                 <Link href="/" className="block text-gray-400 hover:text-white transition">Home</Link>
                 <Link href="/parishes" className="block text-gray-400 hover:text-white transition">Browse Parishes</Link>
                 <Link href="/categories" className="block text-gray-400 hover:text-white transition">All Categories</Link>
+                <Link href="/blog" className="block text-gray-400 hover:text-white transition">Blog</Link>
                 <Link href="/about" className="block text-gray-400 hover:text-white transition">About Us</Link>
               </div>
             </div>
@@ -397,25 +410,24 @@ export default function SearchClient() {
               </div>
             </div>
             <div>
+              <h6 className="font-bold mb-4 text-base md:text-lg">Websites</h6>
+              <div className="space-y-2 text-sm">
+                <a href="https://www.grenadasearch.com" className="block text-gray-400 hover:text-white transition">GrenadaSearch.com</a>
+                <a href="https://www.antiguasearch.com" className="block text-gray-400 hover:text-white transition">AntiguaSearch.com</a>
+                <a href="https://www.stapleyinc.com" target="_blank" rel="noopener noreferrer" className="block text-gray-400 hover:text-white transition">StapleyInc.com</a>
+                <a href="https://www.antiguamarinesolutions.com" target="_blank" rel="noopener noreferrer" className="block text-gray-400 hover:text-white transition">AntiguaMarineSolutions.com</a>
+              </div>
+            </div>
+            <div>
               <h6 className="font-bold mb-4 text-base md:text-lg">Contact</h6>
               <p className="text-gray-400 text-sm mb-2">contact@grenadasearch.com</p>
               <p className="text-gray-400 text-sm">St. George&apos;s, Grenada</p>
             </div>
-                      <div>
-            <h6 className="font-bold mb-4 text-base md:text-lg">Websites</h6>
-            <div className="space-y-2 text-sm">
-              <a href="https://www.grenadasearch.com" className="block text-gray-400 hover:text-white transition">GrenadaSearch.com</a>
-              <a href="https://www.antiguasearch.com" className="block text-gray-400 hover:text-white transition">AntiguaSearch.com</a>
-              <a href="https://www.stapleyinc.com" className="block text-gray-400 hover:text-white transition">StapleyInc.com</a>
-              <a href="https://www.antiguamarinesolutions.com" className="block text-gray-400 hover:text-white transition">AntiguaMarineSolutions.com</a>
-            </div>
-          </div>
-        </div>
           </div>
           <div className="border-t border-gray-800 pt-6 md:pt-8 text-center">
             <p className="text-gray-400 text-sm">© 2026 GrenadaSearch.com. All rights reserved.</p>
           </div>
-
+        </div>
       </footer>
     </div>
   )
