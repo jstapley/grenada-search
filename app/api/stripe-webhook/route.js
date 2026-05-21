@@ -33,6 +33,12 @@ export async function POST(request) {
       if (session.payment_status === 'paid') {
         const { listingId, listingName, userEmail } = session.metadata
 
+        // Skip if this isn't an AntiguaSearch featured listing payment
+        if (!listingId) {
+          console.log('Skipping - no listingId in metadata, likely a StapleyInc payment')
+          return NextResponse.json({ received: true })
+        }
+
         const featuredUntil = new Date()
         featuredUntil.setFullYear(featuredUntil.getFullYear() + 1)
 
