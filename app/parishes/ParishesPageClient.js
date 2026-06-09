@@ -25,8 +25,7 @@ export default function ParishesPageClient({ parishes }) {
             <div className="flex items-center gap-2 text-center">
               <span className="text-xl">🏪</span>
               <span className="text-sm md:text-base">Own a business?</span>
-              <Link href="/add-listing" className="text-[#FCD116] font-semibold underline hover:text-[#e0bc10] text-sm md:text-base whitespace-nowrap">
-                Get premium visibility
+              <Link href="/pricing" className="text-[#FCD116] font-semibold underline hover:text-[#e0bc10] text-sm md:text-base whitespace-nowrap">Get premium visibility
               </Link>
             </div>
           </div>
