@@ -34,7 +34,8 @@ export default function PricingClient() {
             <div className="flex items-center gap-2 text-center">
               <span className="text-xl">🏪</span>
               <span className="text-sm md:text-base">Own a business?</span>
-              <Link href="/pricing" className="text-[#FCD116] font-semibold underline hover:text-[#e0bc10] text-sm md:text-base whitespace-nowrap">Get premium visibility
+              <Link href="/pricing" className="text-[#FCD116] font-semibold underline hover:text-[#e0bc10] text-sm md:text-base whitespace-nowrap">
+                Get premium visibility
               </Link>
             </div>
           </div>
@@ -105,8 +106,8 @@ export default function PricingClient() {
 
       {/* Pricing Cards */}
       <section className="bg-gradient-to-b from-[#F0FAF7] to-white py-16">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-6">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid md:grid-cols-3 gap-6">
 
             {/* Free Plan */}
             <div className="bg-gradient-to-br from-[#007A5E] to-[#004A38] border-4 border-green-400 rounded-2xl p-8 shadow-lg hover:shadow-2xl transition">
@@ -144,7 +145,7 @@ export default function PricingClient() {
 
             {/* Featured Plan */}
             <div className="relative bg-gradient-to-br from-[#007A5E] to-[#004A38] border-4 border-[#FCD116] rounded-2xl p-8 shadow-lg hover:shadow-2xl transition">
-                <div className="text-center mb-6">
+              <div className="text-center mb-6">
                 <div className="inline-block bg-[#FCD116] text-[#1a1a1a] px-6 py-2 rounded-full font-bold text-sm mb-4">FEATURED LISTING</div>
                 <h2 className="text-3xl font-black text-white mb-3">Premium Placement</h2>
                 <p className="text-3xl text-white font-bold mb-1">EC$350<span className="text-lg">/year</span></p>
@@ -184,6 +185,51 @@ export default function PricingClient() {
                 <p className="text-white/70 mt-3 text-xs">Login to your listing to upgrade • Secure payment via Stripe</p>
               </div>
             </div>
+
+            {/* Sponsored Ads Plan */}
+            <div className="relative bg-gradient-to-br from-[#1a1a2e] to-[#16213e] border-4 border-[#007A5E] rounded-2xl p-8 shadow-lg hover:shadow-2xl transition">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#007A5E] text-white px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap">
+                NOW AVAILABLE
+              </div>
+              <div className="text-center mb-6">
+                <div className="inline-block bg-[#007A5E] text-white px-6 py-2 rounded-full font-bold text-sm mb-4">SPONSORED ADS</div>
+                <h2 className="text-3xl font-black text-white mb-3">Business Spotlight</h2>
+                <p className="text-3xl text-white font-bold mb-1">From EC$150<span className="text-lg">/month</span></p>
+                <p className="text-white/80 text-sm mb-2">Flexible weekly, monthly, or seasonal</p>
+                <p className="text-white/90 text-sm">Target customers actively browsing Grenada businesses</p>
+              </div>
+              <div className="mb-4">
+                <h3 className="text-white font-bold text-center mb-3">What&apos;s included:</h3>
+                <div className="space-y-3">
+                  {[
+                    ['Homepage banner placement', 'Maximum exposure to every visitor on the site'],
+                    ['Category page ads', 'Target customers browsing your specific niche'],
+                    ['Parish page placement', 'Reach customers searching in your area'],
+                    ['Custom ad design assistance', 'We help you create effective ads'],
+                    ['Performance analytics', 'Track impressions, clicks, and conversions'],
+                    ['Flexible campaign durations', 'Weekly, monthly, or seasonal campaigns'],
+                  ].map(([title, desc]) => (
+                    <div key={title} className="flex items-start gap-3">
+                      <div className="text-[#007A5E] text-xl flex-shrink-0">✓</div>
+                      <div>
+                        <h3 className="text-white font-bold">{title}</h3>
+                        <p className="text-white/80 text-sm">{desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="text-center mt-6">
+                <Link
+                  href="/contact?subject=Sponsored Ads Inquiry"
+                  className="block bg-[#007A5E] hover:bg-[#005F48] text-white font-black text-lg px-8 py-4 rounded-xl transition shadow-lg border-2 border-[#007A5E] hover:border-[#005F48]"
+                >
+                  Contact for Pricing →
+                </Link>
+                <p className="text-white/70 mt-3 text-xs">Get in touch to discuss your campaign goals</p>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
@@ -229,6 +275,8 @@ export default function PricingClient() {
               ['Can I update my listing?', 'Absolutely! Claim your listing and update your information anytime from your dashboard.'],
               ['How does Featured work?', 'Pay EC$350/year via Stripe and your listing instantly gets a gold border, top placement, and homepage visibility.'],
               ['Will my listing stay free?', 'Yes! Your basic listing will always remain free. Featured is an optional upgrade for more visibility.'],
+              ['How do Sponsored Ads work?', 'Sponsored Ads place your business in high-visibility spots across the site — homepage banner, category pages, and parish pages. Contact us to discuss placement options and pricing starting from EC$150/month.'],
+              ['Who can buy Sponsored Ads?', 'Any business operating in Grenada can purchase sponsored placements. We work with you to design effective ads and choose the right pages to target your ideal customers.'],
             ].map(([q, a]) => (
               <div key={q} className="bg-white p-6 rounded-xl border border-gray-200 hover:border-[#007A5E] transition">
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{q}</h3>
