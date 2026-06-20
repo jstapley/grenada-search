@@ -28,11 +28,13 @@ IMPORTANT RULES:
 - Keep the tone warm, knowledgeable, and authentic to Grenada — the Spice Isle of the Caribbean
 - Do not fabricate specific facts (exact founding dates, specific awards, named owners) unless explicitly provided
 
-Respond with ONLY a JSON object in this exact format, no markdown code fences, no extra text:
+Respond with ONLY a valid JSON object in this exact format, no markdown code fences, no extra text, no additional keys:
 {
   "short_description": "One punchy sentence under 150 characters",
-  "description": "150-250 word description in 2-3 paragraphs covering what the business offers, its location/category context within Grenada, and why a visitor or local would want to use it"
-}`
+  "description": "A SINGLE STRING containing 150-250 words. If you use multiple paragraphs, join them inside this one string value using \\n\\n between paragraphs. Do NOT create separate JSON values for each paragraph — everything must be inside this one description string."
+}
+
+CRITICAL: Your response must be parseable by JSON.parse(). It must have EXACTLY two keys: short_description and description. Do not add extra top-level string values, arrays, or additional keys.`
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
@@ -50,7 +52,20 @@ Respond with ONLY a JSON object in this exact format, no markdown code fences, n
       parsed = JSON.parse(responseText)
     } catch (parseError) {
       console.error('Failed to parse Claude response:', responseText)
-      return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 })
+
+      // Attempt recovery: extract short_description and description with regex as a fallback
+      const shortMatch = responseText.match(/"short_description"\s*:\s*"([^"]+)"/)
+      const descMatch = responseText.match(/"description"\s*:\s*"([\s\S]+?)"\s*[,}]/)
+
+      if (shortMatch && descMatch) {
+        parsed = {
+          short_description: shortMatch[1],
+          description: descMatch[1]
+        }
+        console.log('Recovered via regex fallback')
+      } else {
+        return NextResponse.json({ error: 'Failed to parse AI response' }, { status: 500 })
+      }
     }
 
     const short_description = (parsed.short_description || '').slice(0, 150)
