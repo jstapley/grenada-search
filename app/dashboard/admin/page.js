@@ -7,7 +7,7 @@ import Image from 'next/image'
 import { useAuth } from '@/lib/AuthContext'
 import { supabase } from '@/lib/supabase'
 import Modal from '@/components/Modal'
-import { Star, Check, X, Trash2, ExternalLink } from 'lucide-react'
+import { Star, Check, X, Trash2, ExternalLink, Sparkles } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 
 export default function AdminDashboard() {
@@ -52,6 +52,11 @@ export default function AdminDashboard() {
   const [loadingListing, setLoadingListing] = useState(null)
   const [listingSearch, setListingSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+
+  // Enrichment state
+  const [enrichingId, setEnrichingId] = useState(null)
+  const [enrichPreview, setEnrichPreview] = useState(null)
+  const [savingEnrich, setSavingEnrich] = useState(false)
 
   const [modal, setModal] = useState({
     isOpen: false,
@@ -119,8 +124,6 @@ export default function AdminDashboard() {
 
     const listingsRes = await fetch('/api/admin/listings?type=listings')
     const { data: listingsData } = await listingsRes.json()
-    setListings(listingsData || [])
-
     setListings(listingsData || [])
 
     const { data: claimsData } = await supabase
@@ -337,6 +340,65 @@ export default function AdminDashboard() {
     })
   }
 
+  // Enrichment handlers
+  const handleEnrichListing = async (listing) => {
+    setEnrichingId(listing.id)
+    setEnrichPreview(null)
+    try {
+      const response = await fetch('/api/admin/enrich-listing', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          listing_id: listing.id,
+          business_name: listing.business_name,
+          category: listing.category?.name,
+          parish: listing.parish?.name,
+          existing_description: listing.description || listing.short_description || ''
+        })
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Failed to enrich listing')
+
+      setEnrichPreview({
+        listing_id: listing.id,
+        business_name: listing.business_name,
+        short_description: data.short_description,
+        description: data.description
+      })
+    } catch (error) {
+      showModal('Error', 'Could not enrich listing: ' + error.message, 'error')
+    } finally {
+      setEnrichingId(null)
+    }
+  }
+
+  const handleSaveEnrichment = async () => {
+    if (!enrichPreview) return
+    setSavingEnrich(true)
+    try {
+      const { error } = await supabase
+        .from('listings')
+        .update({
+          short_description: enrichPreview.short_description,
+          description: enrichPreview.description
+        })
+        .eq('id', enrichPreview.listing_id)
+
+      if (error) throw error
+
+      setEnrichPreview(null)
+      showModal('Saved', `Descriptions for "${enrichPreview.business_name}" have been saved.`, 'success', loadAllData)
+    } catch (error) {
+      showModal('Error', 'Could not save descriptions: ' + error.message, 'error')
+    } finally {
+      setSavingEnrich(false)
+    }
+  }
+
+  const handleDiscardEnrichment = () => {
+    setEnrichPreview(null)
+  }
+
   const generateBlogSlug = (title) =>
     title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
@@ -450,6 +512,11 @@ export default function AdminDashboard() {
       listing.business_name?.toLowerCase().includes(listingSearch.toLowerCase()) ||
       listing.category?.name?.toLowerCase().includes(listingSearch.toLowerCase()) ||
       listing.parish?.name?.toLowerCase().includes(listingSearch.toLowerCase())
+
+    if (statusFilter === 'no_description') {
+      return matchesSearch && !listing.short_description
+    }
+
     const matchesStatus = statusFilter === 'all' || listing.status === statusFilter
     return matchesSearch && matchesStatus
   })
@@ -702,6 +769,7 @@ export default function AdminDashboard() {
                     <option value="active">Active Only</option>
                     <option value="pending">Pending Only</option>
                     <option value="rejected">Rejected Only</option>
+                    <option value="no_description">No Description</option>
                   </select>
                 </div>
                 {(listingSearch || statusFilter !== 'all') && (
@@ -716,11 +784,60 @@ export default function AdminDashboard() {
               )}
             </div>
 
+            {/* ENRICHMENT PREVIEW PANEL */}
+            {enrichPreview && (
+              <div className="bg-purple-50 rounded-xl border-2 border-purple-400 p-6 mb-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="w-5 h-5 text-purple-600" />
+                  <h3 className="text-lg font-bold text-purple-900">AI-Generated Descriptions for "{enrichPreview.business_name}"</h3>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-bold text-gray-900 mb-2">Short Description</label>
+                  <textarea
+                    value={enrichPreview.short_description}
+                    onChange={(e) => setEnrichPreview(prev => ({ ...prev, short_description: e.target.value }))}
+                    rows="2"
+                    maxLength={150}
+                    className="w-full px-4 py-3 border-2 border-purple-300 rounded-lg focus:border-purple-500 focus:outline-none"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">{enrichPreview.short_description?.length || 0}/150 characters</p>
+                </div>
+
+                <div className="mb-6">
+                  <label className="block text-sm font-bold text-gray-900 mb-2">Full Description</label>
+                  <textarea
+                    value={enrichPreview.description}
+                    onChange={(e) => setEnrichPreview(prev => ({ ...prev, description: e.target.value }))}
+                    rows="6"
+                    className="w-full px-4 py-3 border-2 border-purple-300 rounded-lg focus:border-purple-500 focus:outline-none"
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleSaveEnrichment}
+                    disabled={savingEnrich}
+                    className="bg-purple-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-purple-700 disabled:bg-gray-400 transition"
+                  >
+                    {savingEnrich ? 'Saving...' : 'Save Descriptions'}
+                  </button>
+                  <button
+                    onClick={handleDiscardEnrichment}
+                    disabled={savingEnrich}
+                    className="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-bold hover:bg-gray-300 transition"
+                  >
+                    Discard
+                  </button>
+                </div>
+              </div>
+            )}
+
             {loadingData ? (
               <div className="text-center py-12"><p className="text-gray-600">Loading listings...</p></div>
             ) : (
               <div className="bg-white rounded-xl border-2 border-gray-200 overflow-x-auto">
-                <table className="w-full min-w-[800px]">
+                <table className="w-full min-w-[900px]">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase">Business</th>
@@ -736,6 +853,11 @@ export default function AdminDashboard() {
                         <td className="px-6 py-4">
                           <div className="font-semibold text-gray-900">{listing.business_name}</div>
                           <div className="text-sm text-gray-500">{listing.slug}</div>
+                          {!listing.short_description && (
+                            <span className="inline-block mt-1 bg-orange-100 text-orange-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                              No description
+                            </span>
+                          )}
                         </td>
                         <td className="px-6 py-4 text-sm">{listing.category?.icon} {listing.category?.name}</td>
                         <td className="px-6 py-4 text-sm text-gray-600">{listing.parish?.name}</td>
@@ -778,6 +900,14 @@ export default function AdminDashboard() {
                               className={`font-semibold text-xs ${listing.featured ? 'text-yellow-600 hover:text-yellow-700' : 'text-gray-400 hover:text-yellow-600'}`}
                             >
                               {listing.featured ? '⭐ Featured' : '☆ Feature'}
+                            </button>
+                            <button
+                              onClick={() => handleEnrichListing(listing)}
+                              disabled={enrichingId === listing.id}
+                              className="flex items-center gap-1 text-purple-600 hover:text-purple-700 font-semibold text-xs disabled:text-gray-400"
+                            >
+                              <Sparkles className="w-3 h-3" />
+                              {enrichingId === listing.id ? 'Enriching...' : 'Enrich'}
                             </button>
                             <Link href={`/listing/${listing.slug}`} target="_blank" className="text-[#007A5E] hover:text-[#005F48] font-semibold text-xs">View</Link>
                             <Link href={`/dashboard/edit/${listing.id}`} className="text-blue-600 hover:text-blue-700 font-semibold text-xs">Edit</Link>
